@@ -60,8 +60,14 @@ export async function renderTVMode() {
                     <div class="video-meta-glass" id="video-info" style="display: none;">
                         <h2 id="video-title">العنوان يظهر هنا</h2>
                         <div class="meta-tags">
-                            <span id="video-author"><i class="fa-solid fa-user"></i> الناشر</span>
-                            <span class="premium-tag"><i class="fa-solid fa-star"></i> جودة عالية</span>
+                            <div id="video-author" class="tv-label">
+                                <i class="fa-solid fa-user"></i>
+                                <span>الناشر</span>
+                            </div>
+                            <div class="tv-label gold-theme premium-tag">
+                                <i class="fa-solid fa-star"></i>
+                                <span>جودة عالية</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -124,7 +130,12 @@ export async function renderTVMode() {
             const playlists = this.getPlaylists();
             const playlist = playlists.find(p => p.id === playlistId);
             if (playlist && !playlist.videos.find(v => v.id === video.id)) {
-                playlist.videos.push({ ...video, done: false });
+                const now = new Date();
+                const day = now.getDate();
+                const months = ['يناير', 'فبراير', 'مارس', 'إبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                const addedAt = `${day} ${months[now.getMonth()]}`;
+                
+                playlist.videos.push({ ...video, done: false, addedAt });
                 this.savePlaylists(playlists);
                 Notifications.success(`تمت الإضافة إلى ${playlist.name}`);
             }
@@ -189,7 +200,10 @@ export async function renderTVMode() {
                                 <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                                     <i class="fa-solid ${v.done ? 'fa-check-circle done-check' : 'fa-circle-play'}" 
                                        onclick="event.stopPropagation(); window.toggleVideoDone('${p.id}', '${v.id}')"></i>
-                                    <span class="video-text" title="${v.title}">${v.title}</span>
+                                    <div style="display: flex; flex-direction: column;">
+                                        <span class="video-text" title="${v.title}">${v.title}</span>
+                                        ${v.addedAt ? `<span class="video-date"><i class="fa-solid fa-calendar-day" style="font-size: 0.65rem; margin-right: 4px; opacity: 0.5;"></i>${v.addedAt}</span>` : ''}
+                                    </div>
                                 </div>
                                 <i class="fa-solid fa-xmark remove-vid-btn" title="إزالة من القائمة"
                                    onclick="event.stopPropagation(); window.removeVideoFromPlaylist('${p.id}', '${v.id}')"></i>
@@ -277,14 +291,14 @@ export async function renderTVMode() {
         
         if (isPlaylist) {
             container.querySelector('#video-title').innerText = 'قائمة تشغيل يوتيوب';
-            container.querySelector('#video-author').innerHTML = `<i class="fa-solid fa-list-ul"></i> YouTube Playlist`;
+            container.querySelector('#video-author').innerHTML = `<i class="fa-solid fa-list-ul"></i> <span>YouTube Playlist</span>`;
             Notifications.info('تم تحميل قائمة التشغيل');
         } else {
             const data = await window.videoEngine.getVideoData(idOrPlaylistId);
             window.currentTVVideo = { id: idOrPlaylistId, title: data.title, author: data.author, thumbnail: data.thumbnail };
             
             container.querySelector('#video-title').innerText = data.title;
-            container.querySelector('#video-author').innerHTML = `<i class="fa-solid fa-user"></i> ${data.author}`;
+            container.querySelector('#video-author').innerHTML = `<i class="fa-solid fa-user"></i> <span>${data.author}</span>`;
             
             saveToHistory(window.currentTVVideo);
             renderHistory();

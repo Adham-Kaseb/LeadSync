@@ -552,14 +552,14 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.05);
     padding: 6px 16px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    max-width: fit-content;
-    transition: all 0.3s ease;
+    border-radius: 50px;
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: default;
     user-select: none;
+    backdrop-filter: blur(10px);
 }
 
 .playlist-title-label i {
@@ -580,9 +580,9 @@
 }
 
 .playlist-title-label:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(var(--gold-rgb), 0.1);
     border-color: rgba(var(--gold-rgb), 0.3);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
 .playlist-actions {
@@ -613,6 +613,95 @@
     transform: scale(1.1);
 }
 
+.video-meta-glass {
+    background: rgba(var(--gold-rgb), 0.03);
+    backdrop-filter: blur(25px);
+    border: 1.5px solid rgba(255, 255, 255, 0.05);
+    border-radius: 30px;
+    padding: 2.5rem 3rem;
+    margin-top: 3rem;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.video-meta-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--metallic-gold), transparent);
+}
+
+.video-meta-glass h2 {
+    font-family: 'Cairo', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 2rem;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    line-height: 1.4;
+}
+
+.meta-tags {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Unified Label System */
+.tv-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default;
+    user-select: none;
+    backdrop-filter: blur(10px);
+}
+
+.tv-label i {
+    color: var(--metallic-gold);
+    font-size: 0.95rem;
+    filter: drop-shadow(0 0 8px rgba(var(--gold-rgb), 0.4));
+}
+
+.tv-label span {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+.tv-label:hover {
+    background: rgba(var(--gold-rgb), 0.1);
+    border-color: rgba(var(--gold-rgb), 0.3);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.tv-label.gold-theme {
+    background: rgba(var(--gold-rgb), 0.1);
+    border-color: rgba(var(--gold-rgb), 0.2);
+}
+
+.tv-label.gold-theme span {
+    color: var(--metallic-gold);
+}
 .playlist-videos {
     display: flex;
     flex-direction: column;
@@ -728,29 +817,9 @@
     color: white;
 }
 
-#video-title {
-    font-family: 'Cairo', sans-serif;
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-    color: #fff;
-    font-weight: 700;
-}
-
-.meta-tags {
-    display: flex;
-    gap: 15px;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.premium-tag {
-    color: var(--metallic-gold);
-    font-weight: 600;
-    text-shadow: 0 0 15px rgba(var(--gold-rgb), 0.4);
-    background: rgba(var(--gold-rgb), 0.1);
-    padding: 2px 10px;
-    border-radius: 20px;
-    border: 1px solid rgba(var(--gold-rgb), 0.2);
+/* Metadata Tags are now using .tv-label */
+.premium-tag span {
+    color: var(--metallic-gold) !important;
 }
 
 /* Persistent Player (PiP) Styles */
@@ -819,4 +888,32 @@
         bottom: 100px;
         right: 15px;
     }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.video-date {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Cairo', sans-serif;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-top: 4px;
+    width: fit-content;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.playlist-video-item:hover .video-date {
+    color: var(--metallic-gold);
+    background: rgba(var(--gold-rgb), 0.1);
 }

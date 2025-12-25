@@ -115,7 +115,12 @@ export function renderMessages() {
             Storage.saveList('message_categories', categories);
         }
 
-        let activeCategory = 'الكل'; 
+        let activeCategory = Storage.get('active_message_category') || 'الكل'; 
+        // Ensure the active category still exists in the categories list
+        if (activeCategory !== 'الكل' && categories.length > 0 && !categories.find(c => c.name === activeCategory)) {
+            activeCategory = 'الكل';
+            Storage.set('active_message_category', 'الكل');
+        }
 
         const templatesGrid = document.createElement('div');
         templatesGrid.style.display = 'grid';
@@ -153,7 +158,12 @@ export function renderMessages() {
                 allBtn.style.borderColor = 'rgba(255,255,255,0.1)';
                 allBtn.innerHTML = `الكل`;
             }
-            allBtn.onclick = () => { activeCategory = 'الكل'; renderCategories(); renderTemplates(); };
+            allBtn.onclick = () => { 
+                activeCategory = 'الكل'; 
+                Storage.set('active_message_category', 'الكل');
+                renderCategories(); 
+                renderTemplates(); 
+            };
             
             // Drag Events for "All"
             allBtn.addEventListener('dragstart', (e) => {
@@ -203,6 +213,7 @@ export function renderMessages() {
                 
                 li.onclick = () => {
                     activeCategory = cat.name;
+                    Storage.set('active_message_category', cat.name);
                     renderCategories();
                     renderTemplates();
                 };
