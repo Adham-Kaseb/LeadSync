@@ -58,18 +58,12 @@ export async function renderTVMode() {
                     </div>
                     
                     <div class="video-meta-glass" id="video-info" style="display: none;">
-                        <div class="meta-side right">
-                            <h2 id="video-title">العنوان يظهر هنا</h2>
-                            <div class="tv-label gold-theme premium-tag">
-                                <i class="fa-solid fa-star"></i>
-                                <span>جودة عالية</span>
-                            </div>
-                        </div>
-                        <div class="meta-side left">
-                            <div id="video-author" class="tv-label">
+                         <div class="info-content-right">
+                            <div class="author-pill">
                                 <i class="fa-solid fa-user"></i>
-                                <span>الناشر</span>
+                                <span id="video-author">الناشر</span>
                             </div>
+                            <h2 id="video-title">العنوان يظهر هنا</h2>
                         </div>
                     </div>
                 </div>
@@ -293,14 +287,16 @@ export async function renderTVMode() {
         
         if (isPlaylist) {
             container.querySelector('#video-title').innerText = 'قائمة تشغيل يوتيوب';
-            container.querySelector('#video-author').innerHTML = `<i class="fa-solid fa-list-ul"></i> <span>YouTube Playlist</span>`;
+            const authorEl = container.querySelector('#video-author');
+            if(authorEl) authorEl.innerText = 'YouTube Playlist';
             Notifications.info('تم تحميل قائمة التشغيل');
         } else {
             const data = await window.videoEngine.getVideoData(idOrPlaylistId);
             window.currentTVVideo = { id: idOrPlaylistId, title: data.title, author: data.author, thumbnail: data.thumbnail };
             
             container.querySelector('#video-title').innerText = data.title;
-            container.querySelector('#video-author').innerHTML = `<i class="fa-solid fa-user"></i> <span>${data.author}</span>`;
+            const authorEl = container.querySelector('#video-author');
+            if(authorEl) authorEl.innerText = data.author;
             
             saveToHistory(window.currentTVVideo);
             renderHistory();

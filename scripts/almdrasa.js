@@ -225,13 +225,8 @@ export function renderAlmdrasa() {
         overlay.className = 'modal-overlay glass-panel';
         overlay.style.position = 'fixed';
         overlay.style.inset = '0';
-        overlay.style.background = 'rgba(0,0,0,0.85)';
-        overlay.style.display = 'flex';
-        overlay.style.justifyContent = 'center';
-        overlay.style.alignItems = 'center';
         overlay.style.zIndex = '3000';
-        overlay.style.backdropFilter = 'blur(5px)';
-
+        
         const ALL_ICONS = [
             'fa-solid fa-link', 'fa-solid fa-globe', 'fa-solid fa-star', 'fa-solid fa-heart',
             'fa-solid fa-house', 'fa-solid fa-user', 'fa-solid fa-gear', 'fa-solid fa-bell',
@@ -284,43 +279,51 @@ export function renderAlmdrasa() {
         let selectedIcon = editingLink ? editingLink.icon : 'fa-solid fa-link';
 
         overlay.innerHTML = `
-            <div class="modal-container glass-panel" style="max-width:550px;">
+            <div class="modal-container almdrasa-modal">
                 <div class="modal-header">
                     <h2 class="modal-title">
-                        <i class="fa-solid fa-graduation-cap"></i>
+                        <i class="fa-solid fa-graduation-cap gold-text"></i>
                         <span>${editingLink ? 'تعديل الرابط' : 'إضافة رابط جديد'}</span>
                     </h2>
                 </div>
 
-                <form id="link-form" style="display:grid; gap:1.2rem;">
-                    <div>
-                        <input id="l-name" class="glass-input" style="width:100%;" placeholder="اسم الرابط (مثال: لوحة التحكم)" required value="${editingLink ? editingLink.title : ''}">
+                <form id="link-form" class="modal-form">
+                    <div class="form-group">
+                        <label>العنوان</label>
+                        <input id="l-name" class="glass-input" placeholder="مثال: لوحة التحكم" required value="${editingLink ? editingLink.title : ''}">
                     </div>
                     
-                    <div>
-                        <input id="l-url" class="glass-input" style="width:100%;" placeholder="الرابط (URL)" required value="${editingLink ? editingLink.url : ''}">
+                    <div class="form-group">
+                        <label>الرابط (URL)</label>
+                        <input id="l-url" class="glass-input" placeholder="https://..." required value="${editingLink ? editingLink.url : ''}">
                     </div>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem;">
-                         <select id="l-category" class="glass-input">
-                            <option value="main" ${editingLink && editingLink.category === 'main' ? 'selected' : ''}>أساسي</option>
-                            <option value="courses" ${editingLink && editingLink.category === 'courses' ? 'selected' : ''}>كورسات</option>
-                            <option value="other" ${editingLink && editingLink.category === 'other' ? 'selected' : ''}>أخرى</option>
-                         </select>
-                         <div id="icon-preview-btn" class="glass-input" style="display:flex; align-items:center; justify-content:center; cursor:pointer; gap:10px;">
-                            <i id="current-icon" class="${selectedIcon}"></i>
-                            <span>اختر أيقونة</span>
+                    <div class="form-row">
+                         <div class="form-group">
+                             <label>القسم</label>
+                             <select id="l-category" class="glass-input">
+                                <option value="main" ${editingLink && editingLink.category === 'main' ? 'selected' : ''}>أساسي</option>
+                                <option value="courses" ${editingLink && editingLink.category === 'courses' ? 'selected' : ''}>كورسات</option>
+                                <option value="other" ${editingLink && editingLink.category === 'other' ? 'selected' : ''}>أخرى</option>
+                             </select>
+                         </div>
+                         <div class="form-group">
+                            <label>الأيقونة</label>
+                            <div id="icon-preview-btn" class="glass-input icon-picker-btn">
+                                <i id="current-icon" class="${selectedIcon}"></i>
+                                <span>تغيير</span>
+                            </div>
                          </div>
                     </div>
 
-                    <div id="icon-selector" style="display:none; padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                        <div id="icons-grid" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px; max-height:150px; overflow-y:auto; padding-bottom:10px;"></div>
-                        <button type="button" id="load-more-icons" class="btn btn-sm btn-glass" style="width:100%; margin-top:10px;">تحميل المزيد...</button>
+                    <div id="icon-selector" class="icon-selector-panel">
+                        <div id="icons-grid" class="icons-grid"></div>
+                        <button type="button" id="load-more-icons" class="btn btn-sm btn-glass load-more-btn">تحميل المزيد...</button>
                     </div>
 
-                    <div style="display:flex; justify-content:center; gap:1rem; margin-top:1.5rem;">
-                        <button type="submit" class="btn btn-primary" style="width:140px; height:48px; font-size:1.1rem;">حفظ</button>
-                        <button type="button" id="l-cancel" class="btn btn-secondary" style="width:140px; height:48px; background:rgba(255,255,255,0.05); color:#fff; border:1px solid rgba(255,255,255,0.1); font-size:1.1rem;">إلغاء</button>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">حفظ</button>
+                        <button type="button" id="l-cancel" class="btn btn-secondary">إلغاء</button>
                     </div>
                 </form>
             </div>
@@ -338,40 +341,37 @@ export function renderAlmdrasa() {
         const currentIconEl = overlay.querySelector('#current-icon');
 
         const allIcons = ALL_ICONS;
-
-        let displayLimit = 18;
+        let displayLimit = 30;
 
         function renderIcons(limit) {
             iconsGrid.innerHTML = '';
             allIcons.slice(0, limit).forEach(icon => {
                 const el = document.createElement('div');
                 el.className = 'icon-item';
-                el.innerHTML = `<i class="${icon}"></i>`;
-                el.style.cssText = 'width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; font-size:1.2rem; border:1px solid rgba(255,255,255,0.05); transition:all 0.2s;';
+                if (icon === selectedIcon) el.classList.add('active');
                 
-                if (icon === selectedIcon) {
-                    el.style.borderColor = 'var(--metallic-gold)';
-                    el.style.background = 'rgba(255,215,0,0.1)';
-                    el.style.color = 'var(--metallic-gold)';
-                }
-
+                el.innerHTML = `<i class="${icon}"></i>`;
+                
                 el.onclick = () => {
                     selectedIcon = icon;
                     currentIconEl.className = icon;
-                    iconSelector.style.display = 'none';
+                    iconSelector.classList.remove('active');
+                    
+                    // Update Active State
+                    overlay.querySelectorAll('.icon-item').forEach(i => i.classList.remove('active'));
+                    el.classList.add('active');
                 };
                 iconsGrid.appendChild(el);
             });
         }
 
         iconBtn.onclick = () => {
-            const isVisible = iconSelector.style.display === 'block';
-            iconSelector.style.display = isVisible ? 'none' : 'block';
-            if (!isVisible) renderIcons(displayLimit);
+            iconSelector.classList.toggle('active');
+            if (iconSelector.classList.contains('active')) renderIcons(displayLimit);
         };
 
         overlay.querySelector('#load-more-icons').onclick = () => {
-            displayLimit += 12;
+            displayLimit += 18;
             renderIcons(displayLimit);
         };
 

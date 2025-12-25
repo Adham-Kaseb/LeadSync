@@ -618,7 +618,7 @@
     backdrop-filter: none;
     border: none;
     padding: 0;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     box-shadow: none;
     position: relative;
     max-width: 1200px;
@@ -626,10 +626,9 @@
     margin-right: auto;
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Align everything to the right */
     align-items: flex-start;
-    gap: 2rem;
-    pointer-events: none; /* Allow clicking through if needed, though buttons are interactive */
+    pointer-events: none;
 }
 
 /* Remove the top line separator */
@@ -637,41 +636,89 @@
     display: none;
 }
 
-.meta-side {
+.info-content-right {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    pointer-events: auto;
-}
-
-.meta-side.right {
     align-items: flex-start; /* RTL: Start is Right */
-    text-align: right;
-    width: 70%;
+    gap: 0.5rem;
+    pointer-events: auto;
+    width: fit-content; /* Box behavior */
+    min-width: 300px;
+    margin-left: auto; /* Align to right */
+    direction: rtl; /* Enforce RTL */
+    
+    /* Playlist Box Style */
+    background: rgba(15, 15, 25, 0.6);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 1.5rem 2.5rem 1.5rem 1.5rem; /* Extra padding right for line */
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
 }
 
-.meta-side.left {
-    align-items: flex-end; /* RTL: End is Left */
-    width: 30%;
+.info-content-right::before {
+    content: '';
+    position: absolute;
+    top: 15%;
+    right: 0;
+    width: 4px;
+    height: 70%;
+    background: var(--metallic-gold);
+    border-radius: 2px 0 0 2px;
+    box-shadow: 0 0 15px rgba(var(--gold-rgb), 0.5);
+}
+
+.author-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05); /* Lighter background for integration */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 16px;
+    border-radius: 50px;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s;
+    margin-bottom: 0px; 
+}
+
+.author-pill:hover {
+    border-color: var(--metallic-gold);
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.author-pill span {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.author-pill i {
+    color: var(--metallic-gold);
+    font-size: 0.9rem;
 }
 
 .video-meta-glass h2 {
     font-family: 'Cairo', sans-serif;
-    font-size: 1.8rem;
+    font-size: 1.8rem; 
     font-weight: 800;
     color: #fff;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
-    line-height: 1.3;
+    margin: 0;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    line-height: 1.2;
+    text-align: right;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    /* direction is inherited from .info-content-right */
 }
 
-.meta-tags {
-    /* Removed or repurposed if needed, but structure changed */
-    display: none; 
+/* Hide old elements */
+.meta-side, .meta-tags {
+    display: none;
 }
 
 /* Unified Label System */
