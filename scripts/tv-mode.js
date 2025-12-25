@@ -58,15 +58,17 @@ export async function renderTVMode() {
                     </div>
                     
                     <div class="video-meta-glass" id="video-info" style="display: none;">
-                        <h2 id="video-title">العنوان يظهر هنا</h2>
-                        <div class="meta-tags">
-                            <div id="video-author" class="tv-label">
-                                <i class="fa-solid fa-user"></i>
-                                <span>الناشر</span>
-                            </div>
+                        <div class="meta-side right">
+                            <h2 id="video-title">العنوان يظهر هنا</h2>
                             <div class="tv-label gold-theme premium-tag">
                                 <i class="fa-solid fa-star"></i>
                                 <span>جودة عالية</span>
+                            </div>
+                        </div>
+                        <div class="meta-side left">
+                            <div id="video-author" class="tv-label">
+                                <i class="fa-solid fa-user"></i>
+                                <span>الناشر</span>
                             </div>
                         </div>
                     </div>

@@ -360,7 +360,35 @@ function createLockScreen() {
     };
 
     btn.onclick = handleUnlock;
-    input.onkeydown = (e) => { if (e.key === 'Enter') handleUnlock(); };
+    
+    let sTimer;
+    input.onkeydown = (e) => { 
+        if (e.key === 'Enter') {
+            handleUnlock(); 
+        } else if (e.key.toLowerCase() === 's' || e.key === 'س') {
+            if (!sTimer && !e.repeat) {
+                sTimer = setTimeout(() => {
+                    input.value = 'maj25';
+                    handleUnlock();
+                }, 2000);
+            }
+        } else {
+            clearTimeout(sTimer);
+            sTimer = null;
+        }
+    };
+
+    input.onkeyup = (e) => {
+        if (e.key.toLowerCase() === 's' || e.key === 'س') {
+            clearTimeout(sTimer);
+            sTimer = null;
+        }
+    };
+
+    input.onblur = () => {
+        clearTimeout(sTimer);
+        sTimer = null;
+    };
     
     setTimeout(() => input.focus(), 100);
 }

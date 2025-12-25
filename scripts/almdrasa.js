@@ -43,42 +43,35 @@ export function renderAlmdrasa() {
         categories.forEach(cat => {
             const catLinks = links.filter(l => l.category === cat.id || (!l.category && cat.id === 'other'));
             
-            const section = document.createElement('div');
-            section.className = 'glass-panel';
-            section.style.padding = '1.5rem';
-            section.style.borderRadius = '16px';
-            section.style.marginBottom = '1rem';
-
+            // Create Section Header
             const sectionHeader = document.createElement('div');
-            sectionHeader.style.display = 'flex';
-            sectionHeader.style.justifyContent = 'space-between';
-            sectionHeader.style.alignItems = 'center';
-            sectionHeader.style.marginBottom = '1rem';
-            sectionHeader.style.cursor = 'pointer';
+            sectionHeader.className = 'category-header';
             sectionHeader.innerHTML = `
-                <h2 style="font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="${cat.icon} gold-text"></i> ${cat.title}
-                    <span style="font-size: 0.8rem; opacity: 0.6; margin-right: 0.5rem;">(${catLinks.length})</span>
-                </h2>
-                <i class="fa-solid fa-chevron-down toggle-icon" style="transition: transform 0.3s;"></i>
+                <div class="category-title">
+                    <i class="${cat.icon}"></i>
+                    <span>${cat.title}</span>
+                    <span class="category-count">(${catLinks.length})</span>
+                </div>
+                <div class="category-toggle">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
             `;
-            section.appendChild(sectionHeader);
-
+            
+            // Grid Container
             const grid = document.createElement('div');
-            grid.className = 'link-grid';
-            grid.style.display = 'grid';
-            grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
-            grid.style.gap = '1.5rem';
-            grid.style.transition = 'all 0.3s ease';
+            grid.className = 'almdrasa-grid';
             grid.dataset.category = cat.id;
 
+            // Toggle Logic
             let isCollapsed = false;
             sectionHeader.onclick = () => {
                 isCollapsed = !isCollapsed;
                 grid.style.display = isCollapsed ? 'none' : 'grid';
-                sectionHeader.querySelector('.toggle-icon').style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0)';
+                sectionHeader.querySelector('.fa-chevron-down').style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0)';
+                sectionHeader.style.opacity = isCollapsed ? '0.7' : '1';
             };
 
+            // Create Cards
             catLinks.forEach(link => {
                 globalShortcutIndex++;
                 const card = createCard(link, globalShortcutIndex);
@@ -87,67 +80,58 @@ export function renderAlmdrasa() {
 
             setupDragAndDrop(grid);
 
-            section.appendChild(grid);
-            sectionsContainer.appendChild(section);
+            sectionsContainer.appendChild(sectionHeader);
+            sectionsContainer.appendChild(grid);
         });
     }
 
     function createCard(link, index) {
         const card = document.createElement('div');
-        card.className = 'glass-card';
-        card.style.display = 'flex';
-        card.style.flexDirection = 'column';
-        card.style.alignItems = 'center';
-        card.style.textAlign = 'center';
-        card.style.position = 'relative';
-        card.style.cursor = 'pointer'; 
-        
+        card.className = 'almdrasa-card';
         card.draggable = true;
         card.dataset.id = link.id; 
 
+        // Drag Events
         card.ondragstart = (e) => {
             e.dataTransfer.setData('text/plain', link.id);
-            card.style.opacity = '0.5';
             card.classList.add('dragging');
         };
         card.ondragend = () => {
-            card.style.opacity = '1';
-            card.classList.remove('dragging');
+             card.classList.remove('dragging');
         };
 
+        // Click Event (Open Link)
         card.onclick = (e) => {
-            if (e.target.closest('.action-group')) return;
+            if (e.target.closest('.card-action-btn')) return;
             window.open(link.url, '_blank');
         };
 
+        // Card HTML Structure
         card.innerHTML = `
-            <div class="action-group" style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s; z-index: 10;">
-                <button class="action-btn copy-link" title="نسخ الرابط" style="width:28px; height:28px; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); border-radius:6px; cursor:pointer;">
+            <div class="card-actions">
+                <button class="card-action-btn copy-link" title="نسخ الرابط">
                     <i class="fa-solid fa-copy"></i>
                 </button>
-                <button class="action-btn edit-link" title="تعديل" style="width:28px; height:28px; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); border-radius:6px; cursor:pointer;">
+                <button class="card-action-btn edit-link" title="تعديل">
                     <i class="fa-solid fa-pen"></i>
                 </button>
-                <button class="action-btn delete-link" title="حذف" style="width:28px; height:28px; background:rgba(255,77,77,0.1); color:#ff4d4d; border:1px solid rgba(255,77,77,0.2); border-radius:6px; cursor:pointer;">
+                <button class="card-action-btn delete" title="حذف">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
 
-            <div style="font-size: 2.5rem; color: var(--metallic-gold); margin-bottom: 1rem;">
-                <i class="${link.icon || 'fa-solid fa-link'}"></i>
+            <div class="card-icon-container">
+                <i class="card-icon ${link.icon || 'fa-solid fa-link'}"></i>
             </div>
             
-            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">${link.title}</h3>
-            
-            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: auto;">
-                 ${index ? `#${index}` : ''}
+            <div class="card-content">
+                <h3 class="card-title">${link.title}</h3>
             </div>
+            
+            <span class="card-id">#${index}</span>
         `;
 
-        const actions = card.querySelector('.action-group');
-        card.addEventListener('mouseenter', () => actions.style.opacity = '1');
-        card.addEventListener('mouseleave', () => actions.style.opacity = '0');
-        
+        // Action Buttons Events
         card.querySelector('.copy-link').onclick = (e) => {
             e.stopPropagation();
             navigator.clipboard.writeText(link.url).then(() => {
@@ -157,7 +141,7 @@ export function renderAlmdrasa() {
             });
         };
 
-        card.querySelector('.delete-link').onclick = (e) => {
+        card.querySelector('.delete').onclick = (e) => {
             e.stopPropagation();
             if(confirm('هل أنت متأكد من حذف هذا الرابط؟')) {
                 const newList = Storage.getList('almdrasa_links').filter(l => l.id !== link.id);
@@ -189,16 +173,13 @@ export function renderAlmdrasa() {
         grid.ondrop = (e) => {
             e.preventDefault();
             const category = grid.dataset.category;
-            
             const currentIds = Array.from(grid.children).map(c => c.dataset.id);
-            
             const allLinks = Storage.getList('almdrasa_links');
             
-            currentIds.forEach((id, index) => {
-                const linkIndex = allLinks.findIndex(l => l.id === id);
-                if (linkIndex > -1) {
-                    allLinks[linkIndex].category = category; 
-                }
+            // Update categories based on drop target
+            currentIds.forEach(id => {
+                const link = allLinks.find(l => l.id === id);
+                if (link) link.category = category;
             });
             
             saveAllSectionsOrder(); 
@@ -209,7 +190,7 @@ export function renderAlmdrasa() {
         const allLinks = Storage.getList('almdrasa_links'); 
         const newMasterList = [];
         
-        document.querySelectorAll('.link-grid').forEach(grid => {
+        document.querySelectorAll('.almdrasa-grid').forEach(grid => {
             const cat = grid.dataset.category;
             Array.from(grid.children).forEach(card => {
                 const id = card.dataset.id;
@@ -225,7 +206,7 @@ export function renderAlmdrasa() {
     }
 
     function getDragAfterElement(container, x, y) {
-        const draggableElements = [...container.querySelectorAll('.glass-card:not(.dragging)')];
+        const draggableElements = [...container.querySelectorAll('.almdrasa-card:not(.dragging)')];
 
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
