@@ -487,7 +487,7 @@ export function renderSettings() {
 
     dataPanel.querySelector('#export-data').onclick = () => {
         const data = {};
-        const keys = ['messages_data', 'notes_data', 'links_data', 'reminders_data', 'calc_history', 'calendar_events', 'canvas_elements', 'leads_data', 'message_categories'];
+        const keys = ['messages_data', 'notes_data', 'links_data', 'reminders_data', 'calc_history', 'calendar_events', 'canvas_elements', 'leads_data', 'message_categories', 'almdrasa_links'];
         keys.forEach(k => {
             data[k] = Storage.getList(k);
         });
