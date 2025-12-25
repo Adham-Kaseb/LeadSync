@@ -1,0 +1,145 @@
+/* leads.css */
+.leads-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+    gap: 2rem; 
+}
+
+.lead-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: visible; 
+}
+
+.lead-card:hover { 
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(227, 185, 56, 0.4);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(227, 185, 56, 0.1);
+}
+
+.lead-card::before {
+    content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--metallic-gold), transparent);
+    opacity: 0.3;
+}
+
+.info-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+    font-size: 0.95rem; color: rgba(255,255,255,0.7);
+    padding: 10px 14px; background: rgba(0,0,0,0.2); border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+.info-row i { width: 20px; text-align: center; color: var(--metallic-gold); font-size: 1.1rem; }
+
+.card-actions {
+    position: absolute; top: -15px; left: -15px; 
+    display: flex; gap: 8px;
+    opacity: 0; transform: scale(0.8); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+}
+
+.lead-card:hover .card-actions { opacity: 1; transform: scale(1); }
+
+.action-btn-circle {
+    width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    transition: all 0.2s; color: #fff;
+}
+
+.action-btn-circle.edit { background: rgba(227, 185, 56, 0.9); color: #000; }
+.action-btn-circle.edit:hover { transform: scale(1.1); background: var(--metallic-gold); }
+.action-btn-circle.delete { background: rgba(231, 76, 60, 0.9); }
+.action-btn-circle.delete:hover { transform: scale(1.1); background: #e74c3c; }
+
+.lead-notes-preview {
+    margin-top: 15px; padding: 12px; 
+    background: rgba(227, 185, 56, 0.05); 
+    border-right: 3px solid var(--metallic-gold);
+    border-radius: 4px 12px 12px 4px;
+    font-size: 0.85rem; color: rgba(255,255,255,0.6);
+    font-style: italic; position: relative;
+}
+
+/* New Analytics Bar Styles */
+.leads-analytics-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.analytic-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.analytic-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    background: rgba(255, 215, 0, 0.1);
+    color: var(--metallic-gold);
+}
+
+.analytic-info .value {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+
+.analytic-info .label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* WhatsApp Icons on Card */
+.direct-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.direct-btn {
+    flex: 1;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(255,255,255,0.03);
+    color: #fff;
+}
+
+.direct-btn.wa { border-color: rgba(37, 211, 102, 0.2); }
+.direct-btn.wa:hover { background: rgba(37, 211, 102, 0.1); border-color: #25d366; color: #25d366; }
+
+.direct-btn.wb { border-color: rgba(18, 140, 126, 0.2); }
+.direct-btn.wb:hover { background: rgba(18, 140, 126, 0.1); border-color: #128c7e; color: #128c7e; }

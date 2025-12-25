@@ -1,0 +1,12 @@
+@import 'base.css';
+@import 'layout.css';
+@import 'components.css';
+@import 'animations.css';
+
+@import 'shortcuts.css';
+@import 'dropdowns.css';
+@import 'modules/lockscreen.css';
+@import 'modules/articles.css';
+@import 'modules/radio.css';
+@import 'modules/tv-mode.css';
+@import 'modules/whatsapp.css';

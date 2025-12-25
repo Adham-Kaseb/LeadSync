@@ -1,0 +1,439 @@
+import { Storage, Utils } from './core.js';
+
+export function renderAlmdrasa() {
+    const container = document.createElement('div');
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `
+        <h1 class="section-title">المدرسة</h1>
+        <button id="add-link-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> إضافة صفحة</button>
+    `;
+    container.appendChild(header);
+
+    const sectionsContainer = document.createElement('div');
+    sectionsContainer.style.display = 'flex';
+    sectionsContainer.style.flexDirection = 'column';
+    sectionsContainer.style.gap = '2rem';
+
+    function render() {
+        sectionsContainer.innerHTML = '';
+        let links = Storage.getList('almdrasa_links');
+        
+        if (links.length === 0) {
+            links = [
+                { id: 'def_1', title: 'لوحة التحكم', url: '#', category: 'main', icon: 'fa-solid fa-chart-pie', timestamp: new Date().toISOString() },
+                { id: 'def_2', title: 'الدورات التدريبية', url: '#', category: 'courses', icon: 'fa-solid fa-graduation-cap', timestamp: new Date().toISOString() },
+                { id: 'def_3', title: 'المجتمع', url: '#', category: 'other', icon: 'fa-solid fa-users', timestamp: new Date().toISOString() },
+                { id: 'def_4', title: 'المكتبة', url: '#', category: 'other', icon: 'fa-solid fa-book', timestamp: new Date().toISOString() },
+                { id: 'def_5', title: 'التقويم الدراسي', url: '#', category: 'main', icon: 'fa-solid fa-calendar', timestamp: new Date().toISOString() },
+                { id: 'def_6', title: 'المسار التعليمي', url: '#', category: 'courses', icon: 'fa-solid fa-road', timestamp: new Date().toISOString() }
+            ];
+            Storage.saveList('almdrasa_links', links);
+        }
+
+        let globalShortcutIndex = 0;
+        
+        const categories = [
+            { id: 'main', title: 'الصفحات الرئيسية', icon: 'fa-solid fa-star' },
+            { id: 'courses', title: 'الدورات', icon: 'fa-solid fa-laptop-code' },
+            { id: 'other', title: 'صفحات أخرى', icon: 'fa-solid fa-layer-group' }
+        ];
+
+        categories.forEach(cat => {
+            const catLinks = links.filter(l => l.category === cat.id || (!l.category && cat.id === 'other'));
+            
+            const section = document.createElement('div');
+            section.className = 'glass-panel';
+            section.style.padding = '1.5rem';
+            section.style.borderRadius = '16px';
+            section.style.marginBottom = '1rem';
+
+            const sectionHeader = document.createElement('div');
+            sectionHeader.style.display = 'flex';
+            sectionHeader.style.justifyContent = 'space-between';
+            sectionHeader.style.alignItems = 'center';
+            sectionHeader.style.marginBottom = '1rem';
+            sectionHeader.style.cursor = 'pointer';
+            sectionHeader.innerHTML = `
+                <h2 style="font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="${cat.icon} gold-text"></i> ${cat.title}
+                    <span style="font-size: 0.8rem; opacity: 0.6; margin-right: 0.5rem;">(${catLinks.length})</span>
+                </h2>
+                <i class="fa-solid fa-chevron-down toggle-icon" style="transition: transform 0.3s;"></i>
+            `;
+            section.appendChild(sectionHeader);
+
+            const grid = document.createElement('div');
+            grid.className = 'link-grid';
+            grid.style.display = 'grid';
+            grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+            grid.style.gap = '1.5rem';
+            grid.style.transition = 'all 0.3s ease';
+            grid.dataset.category = cat.id;
+
+            let isCollapsed = false;
+            sectionHeader.onclick = () => {
+                isCollapsed = !isCollapsed;
+                grid.style.display = isCollapsed ? 'none' : 'grid';
+                sectionHeader.querySelector('.toggle-icon').style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0)';
+            };
+
+            catLinks.forEach(link => {
+                globalShortcutIndex++;
+                const card = createCard(link, globalShortcutIndex);
+                grid.appendChild(card);
+            });
+
+            setupDragAndDrop(grid);
+
+            section.appendChild(grid);
+            sectionsContainer.appendChild(section);
+        });
+    }
+
+    function createCard(link, index) {
+        const card = document.createElement('div');
+        card.className = 'glass-card';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.alignItems = 'center';
+        card.style.textAlign = 'center';
+        card.style.position = 'relative';
+        card.style.cursor = 'pointer'; 
+        
+        card.draggable = true;
+        card.dataset.id = link.id; 
+
+        card.ondragstart = (e) => {
+            e.dataTransfer.setData('text/plain', link.id);
+            card.style.opacity = '0.5';
+            card.classList.add('dragging');
+        };
+        card.ondragend = () => {
+            card.style.opacity = '1';
+            card.classList.remove('dragging');
+        };
+
+        card.onclick = (e) => {
+            if (e.target.closest('.action-group')) return;
+            window.open(link.url, '_blank');
+        };
+
+        card.innerHTML = `
+            <div class="action-group" style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s; z-index: 10;">
+                <button class="action-btn copy-link" title="نسخ الرابط" style="width:28px; height:28px; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); border-radius:6px; cursor:pointer;">
+                    <i class="fa-solid fa-copy"></i>
+                </button>
+                <button class="action-btn edit-link" title="تعديل" style="width:28px; height:28px; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); border-radius:6px; cursor:pointer;">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="action-btn delete-link" title="حذف" style="width:28px; height:28px; background:rgba(255,77,77,0.1); color:#ff4d4d; border:1px solid rgba(255,77,77,0.2); border-radius:6px; cursor:pointer;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+
+            <div style="font-size: 2.5rem; color: var(--metallic-gold); margin-bottom: 1rem;">
+                <i class="${link.icon || 'fa-solid fa-link'}"></i>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #fff;">${link.title}</h3>
+            
+            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: auto;">
+                 ${index ? `#${index}` : ''}
+            </div>
+        `;
+
+        const actions = card.querySelector('.action-group');
+        card.addEventListener('mouseenter', () => actions.style.opacity = '1');
+        card.addEventListener('mouseleave', () => actions.style.opacity = '0');
+        
+        card.querySelector('.copy-link').onclick = (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(link.url).then(() => {
+                const icon = e.currentTarget.querySelector('i');
+                icon.className = 'fa-solid fa-check';
+                setTimeout(() => icon.className = 'fa-solid fa-copy', 1500);
+            });
+        };
+
+        card.querySelector('.delete-link').onclick = (e) => {
+            e.stopPropagation();
+            if(confirm('هل أنت متأكد من حذف هذا الرابط؟')) {
+                const newList = Storage.getList('almdrasa_links').filter(l => l.id !== link.id);
+                Storage.saveList('almdrasa_links', newList);
+                render();
+            }
+        };
+
+        card.querySelector('.edit-link').onclick = (e) => {
+            e.stopPropagation();
+            openModal(link);
+        };
+
+        return card;
+    }
+
+    function setupDragAndDrop(grid) {
+        grid.ondragover = (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(grid, e.clientX, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (afterElement == null) {
+                grid.appendChild(dragging);
+            } else {
+                grid.insertBefore(dragging, afterElement);
+            }
+        };
+
+        grid.ondrop = (e) => {
+            e.preventDefault();
+            const category = grid.dataset.category;
+            
+            const currentIds = Array.from(grid.children).map(c => c.dataset.id);
+            
+            const allLinks = Storage.getList('almdrasa_links');
+            
+            currentIds.forEach((id, index) => {
+                const linkIndex = allLinks.findIndex(l => l.id === id);
+                if (linkIndex > -1) {
+                    allLinks[linkIndex].category = category; 
+                }
+            });
+            
+            saveAllSectionsOrder(); 
+        };
+    }
+
+    function saveAllSectionsOrder() {
+        const allLinks = Storage.getList('almdrasa_links'); 
+        const newMasterList = [];
+        
+        document.querySelectorAll('.link-grid').forEach(grid => {
+            const cat = grid.dataset.category;
+            Array.from(grid.children).forEach(card => {
+                const id = card.dataset.id;
+                const link = allLinks.find(l => l.id === id);
+                if (link) {
+                    link.category = cat; 
+                    newMasterList.push(link);
+                }
+            });
+        });
+        
+        Storage.saveList('almdrasa_links', newMasterList);
+    }
+
+    function getDragAfterElement(container, x, y) {
+        const draggableElements = [...container.querySelectorAll('.glass-card:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+             if (x > box.left && x < box.right && y > box.top && y < box.bottom) {
+                 return { element: child };
+             }
+             return closest;
+        }, { element: null }).element;
+    }
+
+    function openModal(editingLink = null) {
+        const existing = document.querySelector('.modal-overlay');
+        if(existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay glass-panel';
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.background = 'rgba(0,0,0,0.85)';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        overlay.style.zIndex = '3000';
+        overlay.style.backdropFilter = 'blur(5px)';
+
+        const ALL_ICONS = [
+            'fa-solid fa-link', 'fa-solid fa-globe', 'fa-solid fa-star', 'fa-solid fa-heart',
+            'fa-solid fa-house', 'fa-solid fa-user', 'fa-solid fa-gear', 'fa-solid fa-bell',
+            'fa-solid fa-magnifying-glass', 'fa-solid fa-bars', 'fa-solid fa-xmark', 'fa-solid fa-check',
+            'fa-brands fa-google', 'fa-brands fa-youtube', 'fa-brands fa-facebook', 'fa-brands fa-instagram',
+            'fa-brands fa-linkedin', 'fa-brands fa-whatsapp', 'fa-brands fa-twitter', 'fa-brands fa-tiktok',
+            'fa-brands fa-snapchat', 'fa-brands fa-telegram', 'fa-brands fa-discord', 'fa-brands fa-github',
+            'fa-brands fa-behance', 'fa-brands fa-dribbble', 'fa-brands fa-pinterest', 'fa-brands fa-reddit',
+            'fa-brands fa-spotify', 'fa-brands fa-soundcloud', 'fa-brands fa-twitch', 'fa-brands fa-medium',
+            'fa-brands fa-figma', 'fa-brands fa-dropbox', 'fa-brands fa-google-drive', 'fa-brands fa-slack',
+            'fa-brands fa-trello', 'fa-brands fa-shopify', 'fa-brands fa-wordpress', 'fa-brands fa-wix',
+            'fa-brands fa-microsoft', 'fa-brands fa-apple', 'fa-brands fa-android', 'fa-brands fa-aws',
+            'fa-brands fa-paypal', 'fa-brands fa-stripe', 'fa-brands fa-btc', 'fa-brands fa-ethereum',
+            'fa-solid fa-briefcase', 'fa-solid fa-folder', 'fa-solid fa-file', 'fa-solid fa-file-pdf',
+            'fa-solid fa-file-word', 'fa-solid fa-file-excel', 'fa-solid fa-envelope', 'fa-solid fa-inbox',
+            'fa-solid fa-calendar', 'fa-solid fa-clock', 'fa-solid fa-stopwatch', 'fa-solid fa-chart-pie',
+            'fa-solid fa-chart-line', 'fa-solid fa-chart-bar', 'fa-solid fa-calculator', 'fa-solid fa-list',
+            'fa-solid fa-pen', 'fa-solid fa-marker', 'fa-solid fa-trash', 'fa-solid fa-tag',
+            'fa-solid fa-paperclip', 'fa-solid fa-print', 'fa-solid fa-cloud', 'fa-solid fa-cloud-arrow-up',
+            'fa-solid fa-database', 'fa-solid fa-server', 'fa-solid fa-wifi', 'fa-solid fa-signal',
+            'fa-solid fa-graduation-cap', 'fa-solid fa-school', 'fa-solid fa-book', 'fa-solid fa-bookmark',
+            'fa-solid fa-pencil', 'fa-solid fa-flask', 'fa-solid fa-microscope', 'fa-solid fa-code',
+            'fa-solid fa-laptop-code', 'fa-solid fa-robot', 'fa-solid fa-brain', 'fa-solid fa-lightbulb',
+            'fa-solid fa-palette', 'fa-solid fa-camera', 'fa-solid fa-video', 'fa-solid fa-microphone',
+            'fa-solid fa-headphones', 'fa-solid fa-music', 'fa-solid fa-gamepad', 'fa-solid fa-puzzle-piece',
+            'fa-solid fa-shop', 'fa-solid fa-cart-shopping', 'fa-solid fa-basket-shopping', 'fa-solid fa-bag-shopping',
+            'fa-solid fa-credit-card', 'fa-solid fa-wallet', 'fa-solid fa-money-bill', 'fa-solid fa-coins',
+            'fa-solid fa-piggy-bank', 'fa-solid fa-receipt', 'fa-solid fa-barcode', 'fa-solid fa-truck',
+            'fa-solid fa-box', 'fa-solid fa-gift', 'fa-solid fa-percent', 'fa-solid fa-dollar-sign',
+            'fa-solid fa-circle-info', 'fa-solid fa-circle-question', 'fa-solid fa-circle-exclamation', 'fa-solid fa-circle-check',
+            'fa-solid fa-triangle-exclamation', 'fa-solid fa-lock', 'fa-solid fa-unlock', 'fa-solid fa-key',
+            'fa-solid fa-shield', 'fa-solid fa-eye', 'fa-solid fa-eye-slash', 'fa-solid fa-share',
+            'fa-solid fa-share-nodes', 'fa-solid fa-download', 'fa-solid fa-upload', 'fa-solid fa-rotate',
+            'fa-solid fa-arrow-right', 'fa-solid fa-arrow-left', 'fa-solid fa-chevron-down', 'fa-solid fa-chevron-up',
+            'fa-solid fa-location-dot', 'fa-solid fa-map', 'fa-solid fa-compass', 'fa-solid fa-flag',
+            'fa-solid fa-fire', 'fa-solid fa-bolt', 'fa-solid fa-droplet', 'fa-solid fa-snowflake',
+            'fa-solid fa-sun', 'fa-solid fa-moon', 'fa-solid fa-umbrella', 'fa-solid fa-plane',
+            'fa-solid fa-car', 'fa-solid fa-bus', 'fa-solid fa-train', 'fa-solid fa-bicycle',
+            'fa-solid fa-hotel', 'fa-solid fa-utensils', 'fa-solid fa-mug-hot', 'fa-solid fa-wine-glass',
+            'fa-solid fa-burger', 'fa-solid fa-pizza-slice', 'fa-solid fa-baby', 'fa-solid fa-paw',
+            'fa-solid fa-tree', 'fa-solid fa-leaf', 'fa-solid fa-seedling', 'fa-solid fa-recycle',
+            'fa-solid fa-hospital', 'fa-solid fa-heart-pulse', 'fa-solid fa-stethoscope', 'fa-solid fa-pills',
+            'fa-solid fa-user-doctor', 'fa-solid fa-user-nurse', 'fa-solid fa-mask', 'fa-solid fa-virus',
+            'fa-solid fa-handshake', 'fa-solid fa-users', 'fa-solid fa-user-group', 'fa-solid fa-user-plus',
+            'fa-solid fa-comments', 'fa-solid fa-comment-dots', 'fa-solid fa-phone', 'fa-solid fa-mobile',
+            'fa-solid fa-tablet', 'fa-solid fa-desktop', 'fa-solid fa-tv', 'fa-solid fa-keyboard',
+            'fa-solid fa-mouse', 'fa-solid fa-plug', 'fa-solid fa-battery-full', 'fa-solid fa-wifi',
+        ];
+        
+        let selectedIcon = editingLink ? editingLink.icon : 'fa-solid fa-link';
+
+        overlay.innerHTML = `
+            <div class="modal-container glass-panel" style="max-width:550px;">
+                <div class="modal-header">
+                    <h2 class="modal-title">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>${editingLink ? 'تعديل الرابط' : 'إضافة رابط جديد'}</span>
+                    </h2>
+                </div>
+
+                <form id="link-form" style="display:grid; gap:1.2rem;">
+                    <div>
+                        <input id="l-name" class="glass-input" style="width:100%;" placeholder="اسم الرابط (مثال: لوحة التحكم)" required value="${editingLink ? editingLink.title : ''}">
+                    </div>
+                    
+                    <div>
+                        <input id="l-url" class="glass-input" style="width:100%;" placeholder="الرابط (URL)" required value="${editingLink ? editingLink.url : ''}">
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem;">
+                         <select id="l-category" class="glass-input">
+                            <option value="main" ${editingLink && editingLink.category === 'main' ? 'selected' : ''}>أساسي</option>
+                            <option value="courses" ${editingLink && editingLink.category === 'courses' ? 'selected' : ''}>كورسات</option>
+                            <option value="other" ${editingLink && editingLink.category === 'other' ? 'selected' : ''}>أخرى</option>
+                         </select>
+                         <div id="icon-preview-btn" class="glass-input" style="display:flex; align-items:center; justify-content:center; cursor:pointer; gap:10px;">
+                            <i id="current-icon" class="${selectedIcon}"></i>
+                            <span>اختر أيقونة</span>
+                         </div>
+                    </div>
+
+                    <div id="icon-selector" style="display:none; padding:15px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                        <div id="icons-grid" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px; max-height:150px; overflow-y:auto; padding-bottom:10px;"></div>
+                        <button type="button" id="load-more-icons" class="btn btn-sm btn-glass" style="width:100%; margin-top:10px;">تحميل المزيد...</button>
+                    </div>
+
+                    <div style="display:flex; justify-content:center; gap:1rem; margin-top:1.5rem;">
+                        <button type="submit" class="btn btn-primary" style="width:140px; height:48px; font-size:1.1rem;">حفظ</button>
+                        <button type="button" id="l-cancel" class="btn btn-secondary" style="width:140px; height:48px; background:rgba(255,255,255,0.05); color:#fff; border:1px solid rgba(255,255,255,0.1); font-size:1.1rem;">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        Utils.initCustomSelect(overlay.querySelector('#l-category'));
+
+        const form = overlay.querySelector('#link-form');
+        const cancel = overlay.querySelector('#l-cancel');
+        const iconBtn = overlay.querySelector('#icon-preview-btn');
+        const iconSelector = overlay.querySelector('#icon-selector');
+        const iconsGrid = overlay.querySelector('#icons-grid');
+        const currentIconEl = overlay.querySelector('#current-icon');
+
+        const allIcons = ALL_ICONS;
+
+        let displayLimit = 18;
+
+        function renderIcons(limit) {
+            iconsGrid.innerHTML = '';
+            allIcons.slice(0, limit).forEach(icon => {
+                const el = document.createElement('div');
+                el.className = 'icon-item';
+                el.innerHTML = `<i class="${icon}"></i>`;
+                el.style.cssText = 'width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; font-size:1.2rem; border:1px solid rgba(255,255,255,0.05); transition:all 0.2s;';
+                
+                if (icon === selectedIcon) {
+                    el.style.borderColor = 'var(--metallic-gold)';
+                    el.style.background = 'rgba(255,215,0,0.1)';
+                    el.style.color = 'var(--metallic-gold)';
+                }
+
+                el.onclick = () => {
+                    selectedIcon = icon;
+                    currentIconEl.className = icon;
+                    iconSelector.style.display = 'none';
+                };
+                iconsGrid.appendChild(el);
+            });
+        }
+
+        iconBtn.onclick = () => {
+            const isVisible = iconSelector.style.display === 'block';
+            iconSelector.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) renderIcons(displayLimit);
+        };
+
+        overlay.querySelector('#load-more-icons').onclick = () => {
+            displayLimit += 12;
+            renderIcons(displayLimit);
+        };
+
+        const close = () => overlay.remove();
+        cancel.onclick = close;
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+
+            const title = overlay.querySelector('#l-name').value;
+            const url = overlay.querySelector('#l-url').value;
+            const category = overlay.querySelector('#l-category').value;
+            const icon = selectedIcon;
+
+            if(!title || !url) return alert('الرجاء ملء جميع الحقول');
+
+            const list = Storage.getList('almdrasa_links');
+            
+            if(editingLink) {
+                const index = list.findIndex(l => l.id === editingLink.id);
+                if(index > -1) {
+                    list[index] = { ...list[index], title, url, icon, category, timestamp: new Date().toISOString() };
+                }
+            } else {
+                list.push({
+                    id: Utils.generateId(),
+                    title,
+                    url,
+                    icon,
+                    category,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            Storage.saveList('almdrasa_links', list);
+            close();
+            render();
+        };
+    }
+
+    header.querySelector('#add-link-btn').onclick = () => openModal();
+
+    render();
+    container.appendChild(sectionsContainer);
+    return container;
+}

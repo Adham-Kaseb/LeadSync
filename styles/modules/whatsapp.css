@@ -1,0 +1,440 @@
+.whatsapp-hub-page {
+    padding: 2rem;
+    height: 100%;
+    animation: fadeIn 0.4s ease;
+}
+
+.whatsapp-layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 2rem;
+    height: 100%;
+}
+
+/* Dialer Section */
+.premium-dialer {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.dialer-screen {
+    background: rgba(0,0,0,0.3);
+    padding: 1.5rem;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.country-code {
+    color: var(--metallic-gold);
+    font-weight: 700;
+    font-size: 1.2rem;
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.country-code:hover {
+    color: #fff;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 8px;
+}
+
+.dialer-screen input {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 100%;
+    outline: none;
+    font-family: inherit;
+    letter-spacing: 2px;
+}
+
+#clear-dialer {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+
+#clear-dialer:hover {
+    color: var(--error-color, #ff4d4d);
+}
+
+.dialer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.dial-btn {
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: white;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+.dial-btn:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--metallic-gold);
+    color: var(--metallic-gold);
+    transform: scale(1.1);
+}
+
+.dial-btn:active {
+    transform: scale(0.9);
+}
+
+.dialer-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-wa-main {
+    width: 100%;
+    background: #25d366;
+    color: white;
+    padding: 1rem;
+    border-radius: 16px;
+    border: none;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-wa-main.business {
+    background: #128c7e;
+    box-shadow: 0 4px 15px rgba(18, 140, 126, 0.3);
+}
+
+.btn-wa-main:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
+    background: #22bf5b;
+}
+
+.btn-wa-main.business:hover {
+    background: #0e7a6e;
+    box-shadow: 0 8px 25px rgba(18, 140, 126, 0.5);
+}
+
+/* Interaction Section */
+.interaction-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.hub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.hub-header h3 {
+    font-size: 1.1rem;
+    color: var(--metallic-gold);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-mini {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    color: var(--metallic-gold);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.templates-hub, .leads-quick-pick {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+.contacts-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.contact-card-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.2rem;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-card-item:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--metallic-gold);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.contact-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--metallic-gold);
+}
+
+.contact-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: white;
+}
+
+.contact-info p {
+    margin: 2px 0 0 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: 'Inter', sans-serif;
+}
+
+.chat-hint {
+    margin-right: auto;
+    width: 30px;
+    height: 30px;
+    background: rgba(37, 211, 102, 0.1);
+    color: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+.contact-card-item:hover .chat-hint {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.leads-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.lead-pick-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lead-pick-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.lead-avatar {
+    width: 36px; height: 36px;
+    background: var(--metallic-gold);
+    color: black;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.lead-info {
+    display: flex; flex-direction: column;
+}
+
+.lead-info span { color: white; font-size: 0.9rem; }
+.lead-info small { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+
+/* Modal Styles */
+.wa-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+    animation: fadeIn 0.3s ease;
+}
+
+.elite-modal {
+    width: 450px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+}
+
+.modal-header {
+    background: rgba(255, 215, 0, 0.05);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--metallic-gold);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.modal-close:hover {
+    color: var(--error-color, #ff4d4d);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: right;
+    direction: rtl;
+}
+
+.elite-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.elite-input-group label {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.elite-input-group label i {
+    color: var(--metallic-gold);
+    font-size: 0.8rem;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    padding: 12px 15px !important;
+    border-radius: 12px !important;
+    font-size: 1rem !important;
+    transition: all 0.3s !important;
+}
+
+.input-wrapper input:focus {
+    background: rgba(255, 215, 0, 0.05) !important;
+    border-color: var(--metallic-gold) !important;
+    box-shadow: 0 0 15px rgba(255,215,0,0.1) !important;
+}
+
+.country-hint {
+    position: absolute;
+    left: 15px;
+    color: var(--metallic-gold);
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.country-hint:hover {
+    background: rgba(255, 215, 0, 0.1);
+    color: #fff;
+}
+
+.elite-input-group #new-contact-phone {
+    padding-left: 50px !important;
+}
+
+.wa-modal-btns {
+    padding: 1.5rem 2rem;
+    background: rgba(0,0,0,0.2);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.05);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+@media (max-width: 1000px) {
+    .whatsapp-layout {
+        grid-template-columns: 1fr;
+    }
+    .dialer-section {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}

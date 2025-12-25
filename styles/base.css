@@ -1,0 +1,190 @@
+@font-face {
+    font-family: 'Cairo';
+    src: url('../font/Cairo-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Cairo';
+    src: url('../font/Cairo-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Cairo';
+    src: url('../font/Cairo-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+:root {
+    --color-primary: #FFD700;
+    --color-primary-dark: #FFA500;
+    --color-primary-glow: rgba(255, 215, 0, 0.3);
+    
+    --color-bg-primary: #1a1a1a;
+    --color-bg-secondary: #2d2d2d;
+    
+    --color-text-primary: #f5f5f5;
+    --color-text-secondary: rgba(255, 255, 255, 0.7);
+    
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-border-hover: rgba(255, 215, 0, 0.3);
+    
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-blur: 16px;
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    
+    --color-success: #22C55E;
+    --color-error: #EF4444;
+    --color-warning: #F59E0B;
+    --color-info: #3B82F6;
+
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+
+    --font-primary: 'Cairo', sans-serif; 
+}
+
+@media (max-width: 1024px) {
+    :root {
+        --space-lg: 12px;
+        --space-xl: 18px;
+        --space-2xl: 24px;
+        --font-size-2xl: 20px;
+        --font-size-xl: 18px;
+        --sidebar-width: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --space-md: 10px;
+        --space-lg: 8px;
+        --space-xl: 14px;
+        --space-2xl: 20px;
+        --font-size-base: 15px;
+        --font-size-sm: 13px;
+    }
+}
+
+:root {
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    
+    --line-height-heading: 1.2;
+    --line-height-body: 1.5;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.3);
+
+    --radius-sm: 4px;
+    --radius-base: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --sidebar-width: 260px;
+    
+    --alabaster-grey: var(--color-text-primary);
+    --metallic-gold: var(--color-primary);
+    --black: var(--color-bg-primary);
+    --text-secondary: var(--color-text-secondary);
+    --danger: var(--color-error);
+    --success: var(--color-success); 
+    
+    --gold-rgb: 255, 215, 0; 
+    
+    --glass-opacity: 0.05;
+    --glass-shimmer: linear-gradient(120deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Cairo', sans-serif !important;
+    background-color: #0f0f0f; 
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    direction: rtl;
+    text-align: right;
+    line-height: var(--line-height-body);
+    font-size: var(--font-size-base);
+    
+    background: radial-gradient(circle at 15% 50%, #1a1a1a 0%, #2d2d2d 100%); 
+    background-size: cover;
+    background-attachment: fixed !important; 
+}
+
+input, button, select, textarea {
+    font-family: inherit;
+}
+
+::placeholder {
+    font-family: 'Cairo', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--alabaster-grey);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.gold-text {
+    color: var(--metallic-gold);
+    text-shadow: 0 0 15px rgba(var(--gold-rgb), 0.3);
+}
+
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+html {
+    overflow-x: hidden;
+    overflow-y: scroll; 
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
+    scroll-behavior: smooth !important; 
+    height: 100%;
+}
+
+html::-webkit-scrollbar {
+    display: none; 
+}
+
+body {
+    overflow-x: hidden;
+    overflow-y: visible;
+    min-height: 100vh;
+    height: auto;
+    position: relative;
+}

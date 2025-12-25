@@ -1,0 +1,268 @@
+.tv-mode-page {
+    padding: 2rem;
+    animation: fadeIn 0.4s ease;
+}
+
+.tv-hero-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem auto;
+}
+
+.tv-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.tv-url-input-group {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    max-width: 500px;
+}
+
+.tv-url-input-group input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.tv-url-input-group input:focus {
+    border-color: var(--metallic-gold);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#main-player-viewer {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-viewer-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-state {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.elite-player-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.player-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.elite-player-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+.video-ambient-glow {
+    position: absolute;
+    top: -10%; left: -10%; right: -10%; bottom: -10%;
+    background: radial-gradient(circle, var(--metallic-gold) 0%, transparent 70%);
+    opacity: 0.15;
+    filter: blur(80px);
+    z-index: -1;
+    animation: auraBreath 4s infinite alternate;
+}
+
+@keyframes auraBreath {
+    from { opacity: 0.1; transform: scale(1); }
+    to { opacity: 0.2; transform: scale(1.1); }
+}
+
+.video-details-area {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+#video-title {
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+#video-desc {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* TV Browse Section & History */
+.tv-history-section {
+    max-width: 1200px;
+    margin: 3rem auto 0 auto;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tv-browse-section {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tv-category {
+    margin-bottom: 2.5rem;
+}
+
+.tv-category h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.video-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #000;
+}
+
+.video-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.play-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 2rem;
+    color: white;
+}
+
+.video-card:hover {
+    transform: scale(1.05);
+    border-color: var(--metallic-gold);
+    z-index: 10;
+}
+
+.video-card:hover .play-overlay {
+    opacity: 1;
+}
+
+/* Persistent Player (PiP) Styles */
+.elite-player-wrapper.is-pip {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 320px;
+    height: 180px; /* Explicit 16:9 height for 320px width */
+    z-index: 9999;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255, 215, 0, 0.3);
+    animation: slideUpPiP 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUpPiP {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.pip-controls {
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    padding: 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.is-pip:hover .pip-controls {
+    opacity: 1;
+}
+
+.pip-controls button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.pip-controls button:hover {
+    background: var(--metallic-gold);
+    color: #000;
+}
+
+@media (max-width: 768px) {
+    .tv-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .tv-url-input-group {
+        width: 100%;
+        max-width: none;
+    }
+    .elite-player-wrapper.is-pip {
+        width: 240px;
+        bottom: 100px;
+        right: 15px;
+    }
+}
