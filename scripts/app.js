@@ -167,7 +167,7 @@ function initApp() {
         document.documentElement.style.setProperty('--transition-speed', duration);
     }
 
-    const modules = ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp'];
+    const modules = ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles'];
     modules.forEach(mod => {
         const target = mod; 
         const navLink = document.querySelector(`a[data-target="${target}"]`);

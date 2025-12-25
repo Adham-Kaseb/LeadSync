@@ -11,10 +11,10 @@ export function renderMessages() {
         header.innerHTML = `
             <h1 class="section-title">قوالب الرسائل</h1>
             <div style="display:flex; gap:10px; align-items: center;">
-                <div class="view-controls" style="display:flex; gap:5px; background:rgba(255,255,255,0.05); padding:4px; border-radius:30px; border:1px solid rgba(255,255,255,0.1);">
-                    <button id="height-160" title="صغير (160px)" class="btn-icon" style="width:32px; height:32px; border-radius:50%; border:none; background:transparent; color:rgba(255,255,255,0.5); cursor:pointer;"><i class="fa-solid fa-compress"></i></button>
-                    <button id="height-260" title="متوسط (260px)" class="btn-icon" style="width:32px; height:32px; border-radius:50%; border:none; background:transparent; color:rgba(255,255,255,0.5); cursor:pointer;"><i class="fa-solid fa-expand"></i></button>
-                    <button id="height-auto" title="كامل" class="btn-icon active" style="width:32px; height:32px; border-radius:50%; border:none; background:var(--metallic-gold); color:#000; cursor:pointer;"><i class="fa-solid fa-maximize"></i></button>
+                <div class="view-controls" style="display:flex; gap:4px; background:rgba(0,0,0,0.2); padding:4px; border-radius:30px; border:1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                    <button id="height-160" title="صغير (160px)" class="btn-icon" style="width:30px; height:30px; border-radius:50%; border:none; background:transparent; color:rgba(255,255,255,0.5); cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;"><i class="fa-solid fa-compress" style="font-size: 0.85rem;"></i></button>
+                    <button id="height-260" title="متوسط (260px)" class="btn-icon" style="width:30px; height:30px; border-radius:50%; border:none; background:transparent; color:rgba(255,255,255,0.5); cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;"><i class="fa-solid fa-expand" style="font-size: 0.85rem;"></i></button>
+                    <button id="height-auto" title="كامل" class="btn-icon active" style="width:30px; height:30px; border-radius:50%; border:none; background:var(--metallic-gold); color:#000; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;"><i class="fa-solid fa-maximize" style="font-size: 0.85rem;"></i></button>
                 </div>
                 
                 <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.1); margin: 0 5px;"></div>
@@ -84,17 +84,18 @@ export function renderMessages() {
         // Apply initial lock state
         setTimeout(() => updateLockUI(), 0);
 
-        const layout = document.createElement('div');
-        layout.className = 'responsive-split-view';
-
         const catSidebar = document.createElement('div');
-        catSidebar.className = 'glass-panel';
-        catSidebar.style.padding = '1.5rem';
-        catSidebar.style.borderRadius = '16px';
-        catSidebar.style.height = 'fit-content';
-        catSidebar.style.position = 'sticky';
-        catSidebar.style.top = '20px';
-        catSidebar.style.minWidth = '250px';
+        catSidebar.className = 'categories-nav';
+        catSidebar.style.display = 'flex';
+        catSidebar.style.alignItems = 'center';
+        catSidebar.style.gap = '12px';
+        catSidebar.style.overflowX = 'auto';
+        catSidebar.style.padding = '10px 0';
+        catSidebar.style.marginBottom = '2rem';
+        catSidebar.style.scrollbarWidth = 'none'; // Firefox
+        catSidebar.style.msOverflowStyle = 'none'; // IE/Edge
+        catSidebar.style.width = '100%';
+        catSidebar.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
 
         const defaultCategories = [
             { id: 'all', name: 'الكل', icon: 'fa-folder' },
@@ -117,26 +118,30 @@ export function renderMessages() {
         let activeCategory = 'الكل'; 
 
         const templatesGrid = document.createElement('div');
-        templatesGrid.style.columnCount = 'auto';
-        templatesGrid.style.columnWidth = '300px';
-        templatesGrid.style.columnGap = '1.5rem';
+        templatesGrid.style.display = 'grid';
+        templatesGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+        templatesGrid.style.gap = '1.5rem';
+        templatesGrid.style.alignContent = 'start';
 
         function renderCategories() {
             catSidebar.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
-                    <h3 style="font-size: 1.1rem;">التصنيفات</h3>
-                    <button id="manage-cats-btn" class="btn-icon" title="إدارة التصنيفات" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer;"><i class="fa-solid fa-cog"></i></button>
-                </div>
+                <button id="manage-cats-btn" class="btn-icon" title="إدارة التصنيفات" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); cursor:pointer; min-width: 40px; height: 40px; border-radius: 10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i class="fa-solid fa-cog"></i>
+                </button>
             `;
             
             const allBtn = document.createElement('div');
-            allBtn.style.padding = '12px';
-            allBtn.style.textAlign = 'center';
-            allBtn.style.marginBottom = '1rem';
-            allBtn.style.borderRadius = '8px';
-            allBtn.style.cursor = 'pointer';
+            allBtn.setAttribute('draggable', 'true');
+            allBtn.dataset.name = 'الكل';
+            allBtn.style.padding = '8px 20px';
+            allBtn.style.borderRadius = '30px';
+            allBtn.style.cursor = 'grab';
             allBtn.style.fontWeight = 'bold';
-            allBtn.style.fontSize = '1.1rem';
+            allBtn.style.fontSize = '0.95rem';
+            allBtn.style.whiteSpace = 'nowrap';
+            allBtn.style.flexShrink = '0';
+            allBtn.style.transition = 'all 0.3s ease';
+            allBtn.style.border = '1px solid transparent';
             
             if (activeCategory === 'الكل') {
                 allBtn.style.background = 'var(--metallic-gold)';
@@ -145,39 +150,55 @@ export function renderMessages() {
             } else {
                 allBtn.style.background = 'rgba(255,255,255,0.05)';
                 allBtn.style.color = 'var(--text-primary)';
+                allBtn.style.borderColor = 'rgba(255,255,255,0.1)';
                 allBtn.innerHTML = `الكل`;
             }
             allBtn.onclick = () => { activeCategory = 'الكل'; renderCategories(); renderTemplates(); };
+            
+            // Drag Events for "All"
+            allBtn.addEventListener('dragstart', (e) => {
+                allBtn.classList.add('dragging-cat');
+                e.dataTransfer.setData('text/plain', 'الكل');
+                // Prevent children from intercepting events
+                allBtn.querySelectorAll('*').forEach(child => child.style.pointerEvents = 'none');
+                setTimeout(() => allBtn.style.opacity = '0.4', 0);
+            });
+            allBtn.addEventListener('dragend', () => {
+                allBtn.classList.remove('dragging-cat');
+                allBtn.style.opacity = '1';
+                allBtn.querySelectorAll('*').forEach(child => child.style.pointerEvents = 'auto');
+            });
+
             catSidebar.appendChild(allBtn);
 
-            const list = document.createElement('ul');
-            list.style.listStyle = 'none';
-            list.style.paddingRight = '0';
-
+            // Directly append other categories as siblings to allBtn
             categories.filter(c => c.name !== 'الكل').forEach(cat => {
-                const li = document.createElement('li');
-                li.style.padding = '0.8rem 1rem';
-                li.style.margin = '0.4rem 0';
-                li.style.cursor = 'pointer';
-                li.style.borderRadius = '8px';
+                const li = document.createElement('div');
+                li.className = 'cat-pill';
+                li.setAttribute('draggable', 'true');
+                li.dataset.id = cat.id;
+                li.dataset.name = cat.name;
+                li.style.padding = '8px 20px';
+                li.style.cursor = 'grab';
+                li.style.borderRadius = '30px';
                 li.style.transition = 'all 0.3s ease';
                 li.style.display = 'flex';
                 li.style.alignItems = 'center';
-                li.style.justifyContent = 'space-between';
                 li.style.gap = '10px';
+                li.style.fontSize = '0.95rem';
+                li.style.whiteSpace = 'nowrap';
+                li.style.flexShrink = '0';
+                li.style.border = '1px solid transparent';
                 
                 const isActive = activeCategory === cat.name;
                 li.style.color = isActive ? 'var(--metallic-gold)' : 'var(--text-secondary)';
-                li.style.background = isActive ? 'rgba(255, 215, 0, 0.1)' : 'transparent';
+                li.style.background = isActive ? 'rgba(255, 215, 0, 0.1)' : 'rgba(255,255,255,0.05)';
+                li.style.borderColor = isActive ? 'var(--metallic-gold)' : 'rgba(255,255,255,0.1)';
                 li.style.fontWeight = isActive ? 'bold' : 'normal';
-                if (isActive) li.style.borderRight = '3px solid var(--metallic-gold)';
-                else li.style.borderRight = '3px solid transparent';
                 
                 li.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <i class="fa-solid ${cat.icon || 'fa-folder'}"></i>
-                        <span>${cat.name}</span>
-                    </div>
+                    <i class="fa-solid ${cat.icon || 'fa-folder'}"></i>
+                    <span>${cat.name}</span>
                 `;
                 
                 li.onclick = () => {
@@ -185,17 +206,102 @@ export function renderMessages() {
                     renderCategories();
                     renderTemplates();
                 };
+
+                // Drag Events
+                li.addEventListener('dragstart', (e) => {
+                    li.classList.add('dragging-cat');
+                    e.dataTransfer.setData('text/plain', cat.id);
+                    // Prevent children from intercepting events
+                    li.querySelectorAll('*').forEach(child => child.style.pointerEvents = 'none');
+                    setTimeout(() => li.style.opacity = '0.4', 0);
+                });
+
+                li.addEventListener('dragend', () => {
+                    li.classList.remove('dragging-cat');
+                    li.style.opacity = '1';
+                    li.querySelectorAll('*').forEach(child => child.style.pointerEvents = 'auto');
+                });
                 
                 if(!isActive) {
-                    li.onmouseover = () => { li.style.background = 'rgba(255,255,255,0.05)'; li.style.color = '#fff'; };
-                    li.onmouseout = () => { li.style.background = 'transparent'; li.style.color = 'var(--text-secondary)'; };
+                    li.onmouseover = () => { 
+                        li.style.background = 'rgba(255,255,255,0.1)'; 
+                        li.style.color = '#fff'; 
+                        li.style.borderColor = 'rgba(255,255,255,0.2)';
+                    };
+                    li.onmouseout = () => { 
+                        li.style.background = 'rgba(255,255,255,0.05)'; 
+                        li.style.color = 'var(--text-secondary)'; 
+                        li.style.borderColor = 'rgba(255,255,255,0.1)';
+                    };
                 }
 
-                list.appendChild(li);
+                catSidebar.appendChild(li);
             });
-            catSidebar.appendChild(list);
+
+            // Container Drag Over
+            catSidebar.ondragover = (e) => {
+                e.preventDefault();
+                const dragging = document.querySelector('.dragging-cat');
+                if (!dragging) return;
+
+                // Auto-scroll logic for horizontal container
+                const rect = catSidebar.getBoundingClientRect();
+                const x = e.clientX;
+                const threshold = 60;
+                const scrollSpeed = 15;
+                
+                if (x < rect.left + threshold) {
+                    catSidebar.scrollLeft -= scrollSpeed;
+                } else if (x > rect.right - threshold) {
+                    catSidebar.scrollLeft += scrollSpeed;
+                }
+
+                const afterElement = getDragAfterElementHorizontal(catSidebar, e.clientX);
+                if (afterElement == null) {
+                    catSidebar.appendChild(dragging);
+                } else {
+                    catSidebar.insertBefore(dragging, afterElement);
+                }
+            };
+
+            catSidebar.ondrop = (e) => {
+                e.preventDefault();
+                // Get the current order from the DOM
+                const currentOrderNames = [...catSidebar.querySelectorAll('[data-name]')].map(el => el.dataset.name);
+                
+                // Reconstruct the categories array based on the DOM order
+                const newOrder = currentOrderNames.map(name => {
+                    if (name === 'الكل') return { id: 'all', name: 'الكل', icon: 'fa-folder' };
+                    return categories.find(c => c.name === name);
+                }).filter(Boolean);
+
+                categories = newOrder;
+                Storage.saveList('message_categories', categories);
+                // No need to re-render everything, we just re-sync the memory
+                // but we call renderCategories to clear the dragging styles safely
+                renderCategories();
+            };
 
             catSidebar.querySelector('#manage-cats-btn').onclick = () => openCategoryManager();
+        }
+
+        function getDragAfterElementHorizontal(container, x) {
+            const draggableElements = [...container.querySelectorAll('[draggable="true"]:not(.dragging-cat)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const center = box.left + box.width / 2;
+                const offset = x - center;
+
+                // RTL Logic: We want the element that is logically "after" the cursor.
+                // In RTL flex, logically "after" means visually to the LEFT.
+                // So we look for elements whose center is to the LEFT of the cursor (offset > 0).
+                if (offset > 0 && offset < closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.POSITIVE_INFINITY }).element;
         }
 
         function openCategoryManager() {
@@ -392,9 +498,8 @@ export function renderMessages() {
                 templatesGrid.style.display = 'block'; 
                 return;
             } else {
-                templatesGrid.style.display = 'block'; 
-                templatesGrid.style.columnCount = 'auto'; 
-                templatesGrid.style.columnWidth = '300px';
+                templatesGrid.style.display = 'grid'; 
+                templatesGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
             }
 
             filtered.forEach((msg, index) => {
@@ -411,8 +516,8 @@ export function renderMessages() {
                     card.style.border = '1px solid rgba(255,255,255,0.05)';
                 }
                 
-                card.style.breakInside = 'avoid'; 
-                card.style.marginBottom = '1.5rem';
+                card.style.height = 'fit-content';
+                card.style.marginBottom = '0';
                 card.style.position = 'relative';
                 card.style.transition = 'transform 0.2s, box-shadow 0.2s, background 0.2s';
                 card.style.cursor = 'grab';
@@ -671,9 +776,8 @@ export function renderMessages() {
         const addBtn = header.querySelector('#add-template-btn');
         addBtn.onclick = () => openModal();
 
-        layout.appendChild(catSidebar);
-        layout.appendChild(templatesGrid);
-        container.appendChild(layout);
+        container.appendChild(catSidebar);
+        container.appendChild(templatesGrid);
         
         renderCategories();
         renderTemplates();

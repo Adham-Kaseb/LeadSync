@@ -13,6 +13,13 @@ export class VideoEngine {
         return (match && match[7].length === 11) ? match[7] : null;
     }
 
+    static extractPlaylistId(url) {
+        if (!url) return null;
+        const regExp = /[?&]list=([^#&?]+)/;
+        const match = url.match(regExp);
+        return match ? match[1] : null;
+    }
+
     async getVideoData(videoId) {
         try {
             const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
@@ -27,14 +34,21 @@ export class VideoEngine {
         }
     }
 
-    renderPlayer(videoId, mode = 'full') {
-        this.currentVideoId = videoId;
+    renderPlayer(idOrPlaylistId, mode = 'full') {
+        const isPlaylist = idOrPlaylistId.length > 11 || idOrPlaylistId.startsWith('PL');
+        this.currentVideoId = isPlaylist ? null : idOrPlaylistId;
+        
+        const embedUrl = isPlaylist 
+            ? `https://www.youtube.com/embed?listType=playlist&list=${idOrPlaylistId}&autoplay=1&enablejsapi=1`
+            : `https://www.youtube.com/embed/${idOrPlaylistId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
+
         const playerHtml = `
             <div class="elite-player-wrapper ${mode === 'pip' ? 'is-pip' : ''}" id="lead-video-player">
                 <div class="video-ambient-glow" id="ambient-glow"></div>
                 <div class="player-container">
                     <iframe 
-                        src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1" 
+                        id="youtube-player-iframe"
+                        src="${embedUrl}" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen>

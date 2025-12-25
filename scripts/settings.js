@@ -156,12 +156,12 @@ export function renderSettings() {
         };
     }
 
-    const themePanel = document.createElement('div');
-    themePanel.className = 'glass-panel';
-    themePanel.style.padding = '1.5rem';
-    themePanel.style.borderRadius = '16px';
-    themePanel.innerHTML = `
-        <h3 style="margin-bottom: 1.5rem;">التخصيص والمظهر</h3>
+    const combinedPanel = document.createElement('div');
+    combinedPanel.className = 'glass-panel';
+    combinedPanel.style.padding = '1.5rem';
+    combinedPanel.style.borderRadius = '16px';
+    combinedPanel.innerHTML = `
+        <h3 style="margin-bottom: 1.5rem;">التخصيص والاختصارات</h3>
         
         <div style="margin-bottom: 2rem;">
             <label style="display:block; margin-bottom:0.8rem; color:var(--text-secondary);">الوان النظام (Theme Color)</label>
@@ -174,7 +174,7 @@ export function renderSettings() {
             </div>
         </div>
 
-        <div style="margin-bottom: 1.5rem;">
+        <div style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <label style="color:var(--text-secondary);">حجم الخط</label>
                 <span id="font-val" style="color:var(--metallic-gold); font-weight:bold;">100%</span>
@@ -186,10 +186,31 @@ export function renderSettings() {
             </div>
         </div>
 
+        <div>
+            <h4 style="margin-bottom: 1rem; color: #fff;">اختصارات لوحة المفاتيح</h4>
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; margin-bottom:0.8rem; color:var(--text-secondary);">نظام الاختصارات</label>
+                <div class="custom-select-wrapper" id="scheme-dropdown">
+                    <div class="custom-select-trigger">
+                        <span id="scheme-label">اختر النظام</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="custom-options">
+                        <div class="custom-option" data-value="default">الافتراضي (Alt + أرقام)</div>
+                        <div class="custom-option" data-value="alternative">البديل (Ctrl + Shift + أرقام)</div>
+                        <div class="custom-option" data-value="custom">مخصص</div>
+                    </div>
+                </div>
+            </div>
+            <div id="custom-shortcuts-area" style="display: none; margin-top: 1rem;">
+                <h4 style="margin-bottom: 0.5rem; color: var(--metallic-gold);">تخصيص الاختصارات</h4>
+                <div id="shortcuts-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        </div>
     `;
-    grid.appendChild(themePanel);
+    grid.appendChild(combinedPanel);
 
-    const themeCircles = themePanel.querySelectorAll('.theme-circle');
+    const themeCircles = combinedPanel.querySelectorAll('.theme-circle');
     
     const hexToRgb = (hex) => {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -213,33 +234,11 @@ export function renderSettings() {
         }
     });
 
-    const shortcutsPanel = document.createElement('div');
-    shortcutsPanel.className = 'glass-panel';
-    shortcutsPanel.style.padding = '1.5rem';
-    shortcutsPanel.style.borderRadius = '16px';
-    shortcutsPanel.innerHTML = `
-        <h3 style="margin-bottom: 1rem;">اختصارات لوحة المفاتيح</h3>
-        
-        <div style="margin-bottom: 1.5rem;">
-            <label style="display:block; margin-bottom:0.8rem; color:var(--text-secondary);">نظام الاختصارات</label>
-            <div class="custom-select-wrapper" id="scheme-dropdown">
-                <div class="custom-select-trigger">
-                    <span id="scheme-label">اختر النظام</span>
-                    <i class="fa-solid fa-chevron-down"></i>
-                </div>
-                <div class="custom-options">
-                    <div class="custom-option" data-value="default">الافتراضي (Alt + أرقام)</div>
-                    <div class="custom-option" data-value="alternative">البديل (Ctrl + Shift + أرقام)</div>
-                    <div class="custom-option" data-value="custom">مخصص</div>
-                </div>
-            </div>
-        </div>
-
-    `;
-    grid.appendChild(shortcutsPanel);
+    const shortcutsListContainer = combinedPanel.querySelector('#custom-shortcuts-area');
+    const shortcutsList = combinedPanel.querySelector('#shortcuts-list');
 
     function initDropdown(wrapperId, initialValue, onChange) {
-        const wrapper = shortcutsPanel.querySelector(`#${wrapperId}`);
+        const wrapper = combinedPanel.querySelector(`#${wrapperId}`);
         const trigger = wrapper.querySelector('.custom-select-trigger');
         const triggerLabel = wrapper.querySelector('span');
         const options = wrapper.querySelectorAll('.custom-option');
@@ -276,17 +275,7 @@ export function renderSettings() {
     });
 
 
-    const shortcutsListContainer = document.createElement('div');
-    shortcutsListContainer.id = 'custom-shortcuts-area';
-    shortcutsListContainer.style.display = 'none'; 
-    shortcutsListContainer.style.marginTop = '1rem';
-    shortcutsListContainer.innerHTML = `
-        <h4 style="margin-bottom: 0.5rem; color: var(--metallic-gold);">تخصيص الاختصارات</h4>
-        <div id="shortcuts-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-    `;
-    shortcutsPanel.appendChild(shortcutsListContainer);
 
-    const shortcutsList = shortcutsListContainer.querySelector('#shortcuts-list');
 
     initDropdown('scheme-dropdown', ShortcutsManager.config.scheme, (val) => {
         ShortcutsManager.config.scheme = val;
@@ -403,7 +392,7 @@ export function renderSettings() {
         }
     });
 
-    const fontVal = themePanel.querySelector('#font-val');
+    const fontVal = combinedPanel.querySelector('#font-val');
     if(!settings.fontSize || isNaN(settings.fontSize)) settings.fontSize = 100;
     fontVal.textContent = settings.fontSize + '%';
     
@@ -414,10 +403,10 @@ export function renderSettings() {
         document.documentElement.style.fontSize = (16 * (val / 100)) + 'px'; 
     };
 
-    themePanel.querySelector('#font-dec').onclick = () => {
+    combinedPanel.querySelector('#font-dec').onclick = () => {
         if(settings.fontSize > 70) updateFont(settings.fontSize - 10);
     };
-    themePanel.querySelector('#font-inc').onclick = () => {
+    combinedPanel.querySelector('#font-inc').onclick = () => {
         if(settings.fontSize < 150) updateFont(settings.fontSize + 10);
     };
 
