@@ -1,4 +1,5 @@
-import { Storage, Utils } from './core.js';
+import { Storage, Utils, Notifications } from './core.js';
+import { fetchSalesData } from './sales-report.js';
 
 export async function renderDashboard() {
     console.log('Rendering Dashboard...');
@@ -277,6 +278,92 @@ export async function renderDashboard() {
         };
 
         renderActions();
+        const salesCard = document.createElement('div');
+        salesCard.className = 'glass-card sales-overview-card';
+        const renderSalesCard = () => {
+            const data = Storage.get('last_sales_data') || {};
+            const today = data.today || { totalEgp: '---', orders: '---' };
+            const total = data.totalSales || { totalEgp: '---' };
+            const isOld = timestamp && (Date.now() - parseInt(timestamp) > 5 * 60 * 1000);
+            
+            salesCard.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.2rem;">
+                    <h3 style="margin:0;"><i class="fa-solid fa-chart-line gold-text"></i> ملخص المبيعات</h3>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <button class="dash-refresh-btn" id="dash-sales-refresh" title="تحديث البيانات">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                        <div class="live-indicator">
+                            <span class="${isOld ? 'offline-dot' : 'live-pulse'}"></span>
+                            <span style="font-size:0.75rem; color:rgba(255,255,255,0.4)" id="dash-sales-time">${isOld ? 'مخزنة: ' : 'مباشر: '}${timeStr}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-sales-grid">
+                    <div class="dashboard-sales-item">
+                        <span class="dash-sales-label">مبيعات اليوم</span>
+                        <span class="dash-sales-value">${today.totalEgp}</span>
+                    </div>
+                    <div class="dashboard-sales-item">
+                        <span class="dash-sales-label">إجمالي المبيعات</span>
+                        <span class="dash-sales-value">${total.totalEgp}</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.2rem; display: flex; gap: 0.8rem;">
+                    <div style="flex:1; background:rgba(255,215,0,0.05); padding:10px; border-radius:12px; border:1px solid rgba(255,215,0,0.1); text-align:center;">
+                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-bottom:4px;">عدد طلبات اليوم</div>
+                        <div style="font-size:1.1rem; font-weight:700; color:var(--metallic-gold);">${today.orders}</div>
+                    </div>
+                    <button class="btn btn-glass" style="flex:1;" onclick="location.hash='#sales'">
+                        <i class="fa-solid fa-arrow-right"></i> التفاصيل
+                    </button>
+                </div>
+            `;
+            
+            const isOldUI = timestamp && (Date.now() - parseInt(timestamp) > 5 * 60 * 1000);
+            const timeEl = salesCard.querySelector('#dash-sales-time');
+            if (timeEl) timeEl.innerText = `${isOldUI ? 'مخزنة: ' : 'مباشر: '}${timeStr}`;
+            
+            const pulseEl = salesCard.querySelector('.live-pulse, .offline-dot');
+            if (pulseEl) {
+                pulseEl.className = isOldUI ? 'offline-dot' : 'live-pulse';
+            }
+            
+            const refreshBtn = salesCard.querySelector('#dash-sales-refresh');
+            if (refreshBtn) {
+                refreshBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    const icon = refreshBtn.querySelector('i');
+                    icon.classList.add('fa-spin');
+                    updateSales().finally(() => icon.classList.remove('fa-spin'));
+                };
+            }
+        };
+
+        renderSalesCard();
+        grid.appendChild(salesCard);
+
+        // Background update for Sales
+        const updateSales = async () => {
+            try {
+                const data = await fetchSalesData(true);
+                Storage.set('last_sales_data', data);
+                localStorage.setItem('last_sales_update', Date.now());
+                renderSalesCard();
+            } catch (e) {
+                console.warn('Dashboard side sales sync failed', e);
+            }
+        };
+
+        // Initial background sync
+        updateSales();
+        const salesSyncInterval = setInterval(() => {
+            if (container.isConnected) updateSales();
+            else clearInterval(salesSyncInterval);
+        }, 3 * 60 * 1000); // 3 minutes for dashboard sync
+
         grid.appendChild(actionCard);
 
         container.appendChild(grid);
