@@ -21,7 +21,8 @@ const routes = {
     articles: async () => (await import('./articles.js')).renderArticles(),
     tvmode: async () => (await import('./tv-mode.js')).renderTVMode(),
     whatsapp: async () => (await import('./whatsapp-hub.js')).renderWhatsAppHub(),
-    settings: async () => (await import('./settings.js')).renderSettings()
+    settings: async () => (await import('./settings.js')).renderSettings(),
+    sales: async () => (await import('./sales-report.js')).renderSales()
 };
 
 async function handleRoute() {
@@ -167,7 +168,7 @@ function initApp() {
         document.documentElement.style.setProperty('--transition-speed', duration);
     }
 
-    const modules = ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles'];
+    const modules = ['leads', 'almdrasa', 'sales', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles'];
     modules.forEach(mod => {
         const target = mod; 
         const navLink = document.querySelector(`a[data-target="${target}"]`);

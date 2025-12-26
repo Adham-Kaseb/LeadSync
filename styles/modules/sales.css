@@ -1,0 +1,191 @@
+/* sales.css */
+.sales-container {
+    padding: 2rem;
+    animation: fadeIn 0.5s ease;
+}
+
+.sales-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .sales-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sales-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sales-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 0, 255, 0.3);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.sales-card-info {
+    flex: 1;
+}
+
+.sales-card-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.5rem;
+}
+
+.sales-card-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.4;
+    font-family: 'Inter', sans-serif;
+}
+
+.sales-card-trend {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+.trend-up { color: #4ade80; }
+.trend-down { color: #f87171; }
+
+.sales-card-icon {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, #e81c82, #e81c82); /* Pink from reference */
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.4rem;
+    box-shadow: 0 8px 16px rgba(232, 28, 130, 0.2);
+}
+
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+}
+
+#last-updated i.fa-circle {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.sales-header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.refresh-btn {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.refresh-btn i.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.sales-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1.5rem;
+    color: var(--metallic-gold);
+}
+
+.sales-error {
+    background: rgba(239, 68, 68, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 3rem 2rem;
+    border-radius: 24px;
+    text-align: center;
+    max-width: 650px;
+    margin: 4rem auto;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.trouble-box {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: right;
+    direction: rtl;
+}
+
+.trouble-box h4 {
+    margin-bottom: 0.8rem;
+    color: var(--metallic-gold);
+}
+
+.trouble-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.trouble-box li {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.trouble-box li::before {
+    content: '•';
+    color: var(--metallic-gold);
+}
