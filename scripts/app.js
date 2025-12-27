@@ -310,7 +310,7 @@ function createLockScreen() {
         lockScreen.appendChild(video);
     } else {
         const bgImage = document.createElement('img');
-        bgImage.src = 'images/pass-wall.png';
+        bgImage.src = 'images/pass-wall.jpg';
         bgImage.style.position = 'absolute';
         bgImage.style.top = '0';
         bgImage.style.left = '0';
