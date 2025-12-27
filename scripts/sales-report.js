@@ -523,6 +523,11 @@ export async function renderSales() {
                         renderDashboard(data);
                         updateTimestamp(true);
                         Notifications.success('تم تحديث بيانات المبيعات بنجاح');
+                        
+                        // Auto-refresh after 1 second as requested
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
                     } catch (e) {
                         console.error('Manual Parse Error:', e);
                         Notifications.error(e.message || 'لم يتم العثور على بيانات مبيعات صحيحة في النص الملصق');
