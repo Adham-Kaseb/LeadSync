@@ -465,9 +465,9 @@ export async function renderSales() {
                     <i class="fa-solid fa-sync-alt fa-spin-hover" style="font-size: 2.5rem; color: var(--metallic-gold);"></i>
                 </div>
                 
-                <h2 style="color: #fff; margin-bottom: 1rem; font-weight: 800; font-size: 1.8rem;">نظام المزامنة الذكية</h2>
+                <h2 style="color: #fff; margin-bottom: 1rem; font-weight: 800; font-size: 1.8rem;">نظام المزامنة </h2>
                 <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 2.5rem; line-height: 1.6;">
-                    لتقديم أدق التحليلات ومتابعة الأهداف بفعالية، يرجى تزويد النظام ببيانات المبيعات المحدثة من منصة المدرسة.
+                    يرجى تزويد النظام ببيانات المبيعات المحدثة من منصة المدرسة.
                 </p>
                 
                 <div class="manual-input-container" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 2.5rem; backdrop-filter: blur(10px);">
