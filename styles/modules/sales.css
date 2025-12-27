@@ -4,11 +4,144 @@
     animation: fadeIn 0.5s ease;
 }
 
+.sales-grid-container {
+    position: relative;
+    padding: 2rem 0;
+}
+
 .sales-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    gap: 4rem; /* Increased gap for timeline */
     margin-bottom: 3rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Vertical Timeline Bar - Elite 3.0 Data Stream */
+.timeline-v-bar {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: rgba(255, 255, 255, 0.01);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transform: translateX(-50%);
+    z-index: 1;
+    overflow: visible; /* Changed to show cap */
+}
+
+/* Timeline Cap */
+.timeline-v-bar::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 4px;
+    background: var(--metallic-gold);
+    border-radius: 2px;
+    box-shadow: 0 0 15px var(--metallic-gold);
+    z-index: 2;
+}
+
+.timeline-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(to bottom, 
+        rgba(255, 215, 0, 0) 0%,
+        var(--metallic-gold) 50%,
+        #fff 100%);
+    box-shadow: 0 0 30px var(--metallic-gold);
+    border-radius: 20px;
+    transition: height 0.2s cubic-bezier(0.1, 0.5, 0.1, 1);
+}
+
+/* Money Flow Animation */
+.timeline-progress::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.4) 50%, 
+        transparent 100%);
+    background-size: 100% 200px;
+    animation: money-flow 2s linear infinite;
+}
+
+@keyframes money-flow {
+    from { background-position: 0 0; }
+    to { background-position: 0 400px; }
+}
+
+/* Node Performance Glows */
+.timeline-node.active.positive {
+    box-shadow: 0 0 25px #4ade80, 0 0 50px rgba(74, 222, 128, 0.3);
+    border-color: #d9de4a;
+}
+
+.timeline-node.active.negative {
+    box-shadow: 0 0 25px #f87171, 0 0 50px rgba(248, 113, 113, 0.3);
+    border-color: #d6f871;
+}
+
+/* Timeline Nodes */
+.timeline-node {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: #1a1a1a;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 50%;
+    z-index: 3;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.timeline-node.active {
+    background: var(--metallic-gold);
+    border-color: #fff;
+    box-shadow: 0 0 20px var(--metallic-gold), 0 0 40px rgba(255, 215, 0, 0.4);
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+.timeline-node::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border: 1px solid var(--metallic-gold);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.6s ease;
+}
+
+.timeline-node.active::after {
+    opacity: 0.3;
+    transform: scale(1);
+    animation: node-pulse 2s infinite;
+}
+
+@keyframes node-pulse {
+    0% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 0.3; }
+}
+
+#rate-badge:hover {
+    background: rgba(74, 222, 128, 0.2) !important;
+    border-color: #4ade80 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
 }
 
 @media (max-width: 1100px) {
@@ -149,9 +282,9 @@
 
 /* Accent Colors */
 .sales-card.today { --accent-rgb: 255, 215, 0; --accent-color: #ffd700; }
-.sales-card.yesterday { --accent-rgb: 255, 165, 0; --accent-color: #ffa500; }
-.sales-card.currentWeek { --accent-rgb: 0, 210, 255; --accent-color: #00d2ff; }
+.sales-card.yesterday { --accent-rgb: 236, 178, 46; --accent-color: #ecb22e; }
 .sales-card.currentMonth { --accent-rgb: 74, 222, 128; --accent-color: #4ade80; }
+.sales-card.currentWeek { --accent-rgb: 56, 189, 248; --accent-color: #38bdf8; }
 .sales-card.lastMonth { --accent-rgb: 147, 51, 234; --accent-color: #9333ea; }
 .sales-card.currentYear { --accent-rgb: 14, 165, 233; --accent-color: #0ea5e9; }
 .sales-card.lastYear { --accent-rgb: 100, 116, 139; --accent-color: #64748b; }
@@ -185,6 +318,26 @@
     font-size: 1.4rem;
     box-shadow: 0 8px 16px rgba(0,0,0,0.3), 0 0 15px rgba(var(--accent-rgb), 0.2);
     transition: all 0.3s;
+}
+
+.sales-card.timeline-active {
+    border-color: rgba(var(--accent-rgb), 0.5);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.7), 0 0 30px rgba(var(--accent-rgb), 0.15);
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(50, 50, 50, 0.7) 100%);
+    transform: scale(1.02);
+}
+
+.sales-card.timeline-active::before {
+    opacity: 1;
+    background: linear-gradient(135deg, 
+        rgba(var(--accent-rgb), 0.6), 
+        rgba(255, 255, 255, 0.1) 50%, 
+        rgba(var(--accent-rgb), 0.6));
+}
+
+.sales-card.timeline-active .sales-card-icon {
+    transform: scale(1.1) rotate(5deg);
+    background: rgba(var(--accent-rgb), 0.3);
 }
 
 .sales-card:hover .sales-card-icon {
@@ -315,6 +468,11 @@
     0% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.2); opacity: 0.5; }
     100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-ripple {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2.5); opacity: 0; }
 }
 
 .sales-header {

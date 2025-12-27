@@ -173,7 +173,6 @@ html {
     overflow-y: scroll; 
     scrollbar-width: none; 
     -ms-overflow-style: none; 
-    scroll-behavior: smooth !important; 
     height: 100%;
 }
 

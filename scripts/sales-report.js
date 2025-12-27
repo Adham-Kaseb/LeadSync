@@ -3,6 +3,60 @@ import { syncRelay } from './sync-relay.js';
 
 const SALES_REPORT_URL = 'https://almdrasa.com/wp-admin/admin.php?page=almdrasa-sales-reports';
 
+const CURRENCY_API_URL = 'https://api.coinbase.com/v2/exchange-rates?currency=USD';
+const FALLBACK_API_URL = 'https://v6.exchangerate-api.com/v6/e52e027097da13b48f56bf22/latest/USD';
+
+async function getLiveExchangeRate() {
+    // 1. Check for manual override (Ultimate accuracy)
+    const manualRate = localStorage.getItem('manual_usd_egp_rate');
+    if (manualRate) return parseFloat(manualRate);
+
+    // 2. Aggressive cache (15 mins for market accuracy)
+    const cached = localStorage.getItem('usd_egp_rate');
+    const cacheTime = localStorage.getItem('usd_egp_rate_time');
+    if (cached && cacheTime && (Date.now() - cacheTime < 900000)) return parseFloat(cached);
+
+    // 3. Try primary high-accuracy community source
+    try {
+        const res = await fetch(CURRENCY_API_URL);
+        if (res.ok) {
+            const data = await res.json();
+            const rate = data.data && data.data.rates ? parseFloat(data.data.rates.EGP) : null;
+            if (rate && rate > 40) {
+                localStorage.setItem('usd_egp_rate', rate);
+                localStorage.setItem('usd_egp_rate_time', Date.now());
+                return rate;
+            }
+        }
+    } catch (e) { console.error('Primary Rate API Error:', e); }
+
+    // 4. Fallback to authenticated source provided by user
+    try {
+        const res = await fetch(FALLBACK_API_URL);
+        if (res.ok) {
+            const data = await res.json();
+            const rate = data.conversion_rates ? data.conversion_rates.EGP : null;
+            if (rate && rate > 40) {
+                localStorage.setItem('usd_egp_rate', rate);
+                localStorage.setItem('usd_egp_rate_time', Date.now());
+                return rate;
+            }
+        }
+    } catch (e) { console.error('Fallback Rate API Error:', e); }
+    
+    return parseFloat(localStorage.getItem('usd_egp_rate')) || 48.5; // Updated default to current market approx
+}
+
+const getDateContext = () => {
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const remainingDays = Math.max(1, daysInMonth - day + 1); 
+    return { day, daysInMonth, remainingDays, monthName: now.toLocaleDateString('ar-EG', { month: 'long' }) };
+};
+
 export async function renderSales() {
     const container = document.createElement('div');
     container.className = 'sales-container';
@@ -12,16 +66,31 @@ export async function renderSales() {
     header.className = 'sales-header';
     header.innerHTML = `
         <h1 class="section-title">تقرير المبيعات</h1>
-        <div style="display: flex; gap: 1rem; align-items: center;">
+        <div style="display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap;">
             <span id="last-updated" style="font-size: 0.8rem; color: rgba(255,255,255,0.4);"></span>
+            <button id="elite-insights-btn" class="refresh-btn" style="background:linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(255,165,0,0.1) 100%); border-color:rgba(255,215,0,0.3); color:var(--metallic-gold); font-weight:800; box-shadow: 0 0 15px rgba(255,215,0,0.1);">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> تحليلات جاهزة
+            </button>
             <button id="reset-sales-btn" class="refresh-btn" style="background:rgba(239, 68, 68, 0.05); border-color:rgba(239, 68, 68, 0.2); color:#f87171;">
                 <i class="fa-solid fa-trash-can"></i> إدخال جديد
             </button>
-            <button id="refresh-sales-btn" class="refresh-btn">
-                <i class="fa-solid fa-rotate"></i> تحديث تلقائي
+            <button id="open-almdrasa-btn" class="refresh-btn" style="background:rgba(255, 215, 0, 0.05); border-color:rgba(255, 215, 0, 0.2); color:var(--metallic-gold);">
+                <i class="fa-solid fa-external-link"></i> Almdrasa SL
             </button>
         </div>
     `;
+    
+    // Elite Insights Logic
+    header.querySelector('#elite-insights-btn').onclick = () => {
+        const data = Storage.get('last_sales_data');
+        if (!data) return Notifications.warning('يرجى تحديث بيانات المبيعات أولاً');
+        showEliteAnalyticsHub(data);
+    };
+    
+    const openAlmdrasaBtn = header.querySelector('#open-almdrasa-btn');
+    if (openAlmdrasaBtn) {
+        openAlmdrasaBtn.onclick = () => window.open(SALES_REPORT_URL, '_blank');
+    }
     container.appendChild(header);
 
     const contentArea = document.createElement('div');
@@ -44,14 +113,16 @@ export async function renderSales() {
 
         try {
             const data = await fetchSalesData(force);
-            renderDashboard(data);
+            const rate = await getLiveExchangeRate();
+            renderDashboard(data, rate);
             updateTimestamp();
         } catch (error) {
             console.error('Sales Load Error:', error);
             const cached = Storage.get('last_sales_data');
+            const rate = await getLiveExchangeRate();
             if (cached) {
-                renderDashboard(cached);
-                updateTimestamp(true, error.message.includes('CORS') ? 'CORS' : 'خطأ'); 
+                renderDashboard(cached, rate);
+                updateTimestamp(true); 
                 Notifications.warning(`تعذر التحديث: ${error.message.includes('CORS') ? 'مشكلة في الاتصال' : error.message}`);
                 
                 // Show Relay Setup if CORS fails
@@ -64,18 +135,116 @@ export async function renderSales() {
         }
     }
 
-    // Real-time interval (Refresh every 5 minutes)
-    const refreshInterval = setInterval(() => {
-        if (document.contains(container)) {
-            loadData(true);
-        } else {
-            clearInterval(refreshInterval);
-        }
-    }, 5 * 60 * 1000);
 
-    function renderDashboard(data) {
+
+    function renderDashboard(data, rate = 50.0) {
         contentArea.innerHTML = '';
+        const { day, daysInMonth, remainingDays, monthName } = getDateContext();
+
+        // Target Logic
+        let targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 10000;
+        const currentUsdStr = data.currentMonth ? data.currentMonth.usdAmount : "$0";
+        const currentUsdVal = parseFloat(currentUsdStr.replace(/[$,]/g, '')) || 0;
         
+        // Calculations
+        const remainingVal = Math.max(0, targetAmount - currentUsdVal);
+        const percentAchieved = Math.min(100, (currentUsdVal / targetAmount) * 100);
+        
+        const requiredDaily = remainingVal / remainingDays;
+        
+        // EGP Conversion
+        const currentEgpVal = (currentUsdVal * rate).toLocaleString(undefined, { maximumFractionDigits: 0 });
+        const remainingEgpVal = (remainingVal * rate).toLocaleString(undefined, { maximumFractionDigits: 0 });
+        const targetEgpVal = (targetAmount * rate).toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+        const targetCard = document.createElement('div');
+        targetCard.className = 'glass-card target-progress-card';
+        targetCard.style.marginBottom = '2rem';
+        targetCard.style.padding = '2rem';
+        targetCard.style.background = 'linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%)';
+        targetCard.style.border = '1px solid rgba(255, 215, 0, 0.2)';
+        
+        targetCard.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3 style="margin: 0; color: var(--metallic-gold); font-size: 1.5rem; font-family:'Cairo';">
+                            <i class="fa-solid fa-bullseye"></i> هدف مبيعات الشهر (${monthName})
+                        </h3>
+                        <button id="edit-target-btn" class="radio-mini-btn" title="تعديل الهدف" style="width:28px; height:28px; background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2);">
+                            <i class="fa-solid fa-pen" style="font-size:0.7rem; color:var(--metallic-gold);"></i>
+                        </button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                        <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 0.95rem; font-family:'Cairo'; font-weight: 600;">الهدف: $${targetAmount.toLocaleString()} <span style="font-size: 0.8rem; opacity: 0.6;">(≈ ${targetEgpVal} EGP)</span></p>
+                        <div id="rate-badge" title="سعر الصرف المباشر من Coinbase - انقر للتعديل يدوياً" style="background: rgba(74, 222, 128, 0.08); color: #4ade80; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2); font-family:'Inter'; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 6px; backdrop-filter: blur(4px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <span class="live-dot" style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 12px #4ade80; animation: pulse 1.5s infinite; position: relative;">
+                                <span style="position: absolute; inset: -2px; border-radius: 50%; border: 1px solid #4ade80; opacity: 0; animation: pulse-ripple 1.5s infinite;"></span>
+                            </span>
+                            <span style="font-weight: 700;">$1 = ${rate} EGP</span>
+                            ${localStorage.getItem('manual_usd_egp_rate') ? '<span style="font-size: 0.65rem; opacity: 0.7; font-family:\'Cairo\'; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 6px;"></span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: left;">
+                    <div style="font-size: 2.5rem; font-weight: 900; color: #fff; font-family:'Inter'; line-height: 1;">${percentAchieved.toFixed(1)}%</div>
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); text-align: right; font-family:'Cairo';">اليوم ${day} من ${daysInMonth}</div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); height: 16px; border-radius: 20px; overflow: hidden; margin-bottom: 1rem; border: 1px solid rgba(255,215,0,0.1); padding: 2px;">
+                <div style="width: ${percentAchieved}%; height: 100%; border-radius: 20px; background: linear-gradient(90deg, #B8860B, #FFD700); box-shadow: 0 0 20px rgba(255,215,0,0.4); transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
+            </div>
+
+            <p style="font-size: 0.95rem; color: var(--metallic-gold); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-family:'Cairo'; font-weight: 700;">
+                <i class="fa-solid fa-person-running" style="animation: bounce 1s infinite;"></i>
+                تحتاج إلى $${requiredDaily.toLocaleString(undefined, {maximumFractionDigits:0})} يومياً <span style="font-size:0.8rem; opacity:0.7;">(≈ ${(requiredDaily * rate).toLocaleString(undefined, {maximumFractionDigits:0})} EGP)</span> للوصول للهدف.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-family:'Cairo';">تم تحقيقه بفضل الله</div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #4ade80; font-family:'Inter';">$${currentUsdVal.toLocaleString()}</div>
+                    <div style="font-size: 0.9rem; color: rgba(74, 222, 128, 0.6); font-family:'Inter'; font-weight: 600;">≈ ${currentEgpVal} EGP</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-family:'Cairo';">متبقي للهدف إن شاء الله</div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #f87171; font-family:'Inter';">$${remainingVal.toLocaleString()}</div>
+                    <div style="font-size: 0.9rem; color: rgba(248, 113, 113, 0.6); font-family:'Inter'; font-weight: 600;">≈ ${remainingEgpVal} EGP</div>
+                </div>
+            </div>
+        `;
+
+        targetCard.querySelector('#edit-target-btn').onclick = () => {
+            const newTarget = prompt('أدخل هدف المبيعات الجديد ($):', targetAmount);
+            if (newTarget && !isNaN(newTarget)) {
+                localStorage.setItem('sales_monthly_target', newTarget);
+                loadData(true);
+                Notifications.success(`تم تحديث الهدف إلى $${parseFloat(newTarget).toLocaleString()}`);
+            }
+        };
+
+        targetCard.querySelector('#rate-badge').onclick = () => {
+            const current = localStorage.getItem('manual_usd_egp_rate') || rate;
+            const newRate = prompt('أدخل سعر صرف الدولار مقابل الجنيه (EGP) كما هو في جوجل:', current);
+            if (newRate === '') {
+                localStorage.removeItem('manual_usd_egp_rate');
+                loadData(true);
+                Notifications.success('تمت العودة لسعر الصرف التلقائي');
+            } else if (newRate && !isNaN(newRate)) {
+                localStorage.setItem('manual_usd_egp_rate', newRate);
+                loadData(true);
+                Notifications.success(`تم تحديث سعر الصرف يدوياً إلى ${newRate} EGP`);
+            }
+        };
+
+        contentArea.appendChild(targetCard);
+
+        // Create Grid Container for Timeline
+        const gridContainer = document.createElement('div');
+        gridContainer.style.marginTop = '1.5rem';
+        gridContainer.className = 'sales-grid-container';
+
         // 1. Sales Cards Grid
         const grid = document.createElement('div');
         grid.className = 'sales-grid';
@@ -165,48 +334,161 @@ export async function renderSales() {
             grid.appendChild(card);
         });
 
-        contentArea.appendChild(grid);
+        // Inject Timeline Bar
+        const timelineBar = document.createElement('div');
+        timelineBar.className = 'timeline-v-bar';
+        timelineBar.innerHTML = `<div class="timeline-progress" id="scrolling-progress"></div>`;
+        gridContainer.appendChild(timelineBar);
+
+        // Milestone mappings for Data labels
+        const milestones = {
+            today: 'اليوم',
+            yesterday: 'الأمس',
+            currentWeek: 'الأسبوع',
+            currentMonth: 'الشهري',
+            lastMonth: 'السابق',
+            currentYear: 'السنوي',
+            totalSales: 'الإجمالي'
+        };
+
+        const dataEntries = Object.entries(data);
+        const rowCount = Math.ceil(dataEntries.length / 2);
+
+        for (let i = 0; i < rowCount; i++) {
+            const [key, val] = dataEntries[i * 2];
+            const isTrendUp = val.trend && val.trend.startsWith('+');
+
+            const node = document.createElement('div');
+            node.className = `timeline-node ${isTrendUp ? 'positive' : 'negative'}`;
+            node.id = `node-${i}`;
+
+            const leftArm = document.createElement('div');
+            leftArm.className = 'timeline-arm left';
+            leftArm.id = `arm-l-${i}`;
+
+            const rightArm = document.createElement('div');
+            rightArm.className = 'timeline-arm right';
+            rightArm.id = `arm-r-${i}`;
+
+            gridContainer.appendChild(node);
+            gridContainer.appendChild(leftArm);
+            gridContainer.appendChild(rightArm);
+        }
+
+        gridContainer.appendChild(grid);
+        contentArea.appendChild(gridContainer);
+
+        // Timeline Awareness Logic
+        const updateTimeline = () => {
+            const containerRect = gridContainer.getBoundingClientRect();
+            const viewHeight = window.innerHeight;
+            
+            // Progress Calculation
+            const scrollY = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight;
+            const isAtBottom = (window.innerHeight + scrollY) >= (docHeight - 20);
+            
+            let progress = 0;
+            const containerTop = gridContainer.offsetTop;
+            const containerHeight = gridContainer.offsetHeight;
+            const scrollRelative = (scrollY + viewHeight / 2) - containerTop;
+            
+            progress = (scrollRelative / containerHeight) * 100;
+
+            if (isAtBottom) progress = 100;
+            if (scrollY < containerTop - 200) progress = 0;
+            
+            const progressEl = gridContainer.querySelector('#scrolling-progress');
+            if (progressEl) progressEl.style.height = `${Math.max(0, Math.min(100, progress))}%`;
+
+            // Node Activation
+            const nodes = gridContainer.querySelectorAll('.timeline-node');
+            const cards = grid.querySelectorAll('.sales-card');
+            
+            nodes.forEach((node, idx) => {
+                const rowStartCard = cards[idx * 2];
+                if (rowStartCard) {
+                    const cardRect = rowStartCard.getBoundingClientRect();
+                    const nodeTop = (idx * (cardRect.height + 64)) + (cardRect.height / 2); 
+                    
+                    node.style.top = `${nodeTop}px`;
+                    
+                    const lArm = gridContainer.querySelector(`#arm-l-${idx}`);
+                    const rArm = gridContainer.querySelector(`#arm-r-${idx}`);
+                    if (lArm) lArm.style.top = `${nodeTop}px`;
+                    if (rArm) rArm.style.top = `${nodeTop}px`;
+
+                    const isLastNode = idx === nodes.length - 1;
+
+                    if (cardRect.top < viewHeight / 2 + 100 || (isAtBottom && isLastNode)) {
+                        node.classList.add('active');
+                        if (lArm) lArm.style.width = '30px', lArm.style.opacity = '1';
+                        if (rArm) rArm.style.width = '30px', rArm.style.opacity = '1';
+                        
+                        rowStartCard.classList.add('timeline-active');
+                        const secondCard = cards[idx * 2 + 1];
+                        if (secondCard) secondCard.classList.add('timeline-active');
+                    } else {
+                        node.classList.remove('active');
+                        if (lArm) lArm.style.width = '0', lArm.style.opacity = '0';
+                        if (rArm) rArm.style.width = '0', rArm.style.opacity = '0';
+                        
+                        rowStartCard.classList.remove('timeline-active');
+                        const secondCard = cards[idx * 2 + 1];
+                        if (secondCard) secondCard.classList.remove('timeline-active');
+                    }
+                }
+            });
+        };
+
+        window.addEventListener('scroll', updateTimeline);
+        setTimeout(updateTimeline, 100); // Initial sync
+
+        // Real-time Auto-refresh (Every 5 minutes)
+        const refreshInterval = setInterval(async () => {
+            if (!container.isConnected) return clearInterval(refreshInterval);
+            if (localStorage.getItem('manual_usd_egp_rate')) return;
+            
+            const newRate = await getLiveExchangeRate();
+            const badge = container.querySelector('#rate-badge span:nth-child(2)');
+            if (badge) {
+                badge.innerText = `$1 = ${newRate} EGP`;
+            }
+        }, 300000); // 5 minutes
     }
 
 
     function renderError(msg, technical) {
         contentArea.innerHTML = `
-            <div class="sales-error">
-                <i class="fa-solid fa-triangle-exclamation" style="font-size: 4rem; color: #ef4444; margin-bottom: 1.5rem;"></i>
-                <h2 style="color: #fff; margin-bottom: 1rem;">عذراً، فشل الاتصال التلقائي</h2>
-                <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 2rem;">${msg}</p>
+            <div class="sales-error" style="max-width: 600px; margin: 4rem auto; text-align: center;">
+                <div style="background: rgba(255, 215, 0, 0.05); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; border: 1px solid rgba(255, 215, 0, 0.2);">
+                    <i class="fa-solid fa-sync-alt fa-spin-hover" style="font-size: 2.5rem; color: var(--metallic-gold);"></i>
+                </div>
                 
-                <div class="manual-input-container" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 2rem; margin-top: 1rem;">
+                <h2 style="color: #fff; margin-bottom: 1rem; font-weight: 800; font-size: 1.8rem;">نظام المزامنة الذكية</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 2.5rem; line-height: 1.6;">
+                    لتقديم أدق التحليلات ومتابعة الأهداف بفعالية، يرجى تزويد النظام ببيانات المبيعات المحدثة من منصة المدرسة.
+                </p>
+                
+                <div class="manual-input-container" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 2.5rem; backdrop-filter: blur(10px);">
                     <div style="text-align: right; margin-bottom: 1.5rem;">
-                        <h3 style="color: var(--metallic-gold); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
-                            <i class="fa-solid fa-file-import"></i> تحديث البيانات يدوياً
+                        <h3 style="color: var(--metallic-gold); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 12px; font-size: 1.2rem;">
+                            <i class="fa-solid fa-paste"></i> مزامنة البيانات الفورية
                         </h3>
-                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
-                            قم بنسخ محتوى صفحة تقارير المبيعات بالكامل (Ctrl+A ثم Ctrl+C) والصقه في المربع أدناه لتحديث لوحة التحكم.
-                        </p>
+                  
                     </div>
-
+ 
                     <textarea id="manual-paste-area" 
-                        placeholder="قم بلصق محتوى الصفحة هنا..." 
-                        style="width: 100%; height: 200px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; color: #fff; padding: 20px; font-family: 'Cairo', sans-serif; font-size: 14px; line-height: 1.6; resize: none; margin-bottom: 1.5rem; outline: none; transition: all 0.3s ease;"
-                        onfocus="this.style.borderColor='rgba(255,215,0,0.4)'; this.style.boxShadow='0 0 15px rgba(255,215,0,0.1)';"
-                        onblur="this.style.borderColor='rgba(255,215,0,0.1)'; this.style.boxShadow='none';"></textarea>
-
-                    <button id="parse-manual-btn" class="btn btn-primary" style="padding: 15px 40px; font-weight: 700; width: 100%; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); border: none; color: #000; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> تحليل البيانات وتحديث التقرير
+                        placeholder="الصق تقارير المبيعات هنا..." 
+                        style="width: 100%; height: 180px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 16px; color: #fff; padding: 20px; font-family: 'Cairo', sans-serif; font-size: 14px; line-height: 1.6; resize: none; margin-bottom: 1.5rem; outline: none; transition: all 0.3s ease; text-align: right;"></textarea>
+ 
+                    <button id="parse-manual-btn" class="btn btn-primary" style="padding: 18px 40px; font-weight: 800; width: 100%; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 12px; background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%); border: none; color: #000; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.2); border-radius: 14px; cursor: pointer;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> بدء المعالجة وتحليل المبيعات
                     </button>
-                    
-                    <div style="margin-top: 1.5rem; text-align: center;">
-                        <button id="retry-sales-btn" style="background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; text-decoration: underline; font-size: 0.85rem;">
-                            أو حاول الاتصال التلقائي مرة أخرى
-                        </button>
-                    </div>
                 </div>
             </div>
         `;
         
-        const retryBtn = contentArea.querySelector('#retry-sales-btn');
-        if (retryBtn) retryBtn.onclick = () => loadData(true);
         
         const parseBtn = contentArea.querySelector('#parse-manual-btn');
         if (parseBtn) {
@@ -222,6 +504,7 @@ export async function renderSales() {
                         const data = parseSalesData(raw);
                         localStorage.setItem('last_sales_data', JSON.stringify(data));
                         localStorage.setItem('last_sales_update', Date.now());
+                        localStorage.setItem('sales_dashboard_initialized', 'true');
                         renderDashboard(data);
                         updateTimestamp(true);
                         Notifications.success('تم تحديث بيانات المبيعات بنجاح');
@@ -237,59 +520,46 @@ export async function renderSales() {
     }
 
     const DEMO_DATA = {
-        today: { usdAmount: "$515", egpAmount: "39,825 EGP", totalEgp: "64,322 EGP", orders: "413", trend: "-17%" },
-        yesterday: { usdAmount: "$360", egpAmount: "59,956 EGP", totalEgp: "77,080 EGP", orders: "632", trend: "-48%" },
-        currentWeek: { usdAmount: "$1,275", egpAmount: "145,598 EGP", totalEgp: "206,246 EGP", orders: "1,097", trend: "+52%" },
-        currentMonth: { usdAmount: "$5,065", egpAmount: "364,444 EGP", totalEgp: "605,373 EGP", orders: "1,368", trend: "-38%" },
-        lastMonth: { usdAmount: "$9,635", egpAmount: "475,940 EGP", totalEgp: "934,267 EGP", orders: "693", trend: "-51%" },
-        currentYear: { usdAmount: "$95,331", egpAmount: "6,934,926 EGP", totalEgp: "11,598,514 EGP", orders: "11,829", trend: null },
-        lastYear: { usdAmount: "$56,596", egpAmount: "3,391,053 EGP", totalEgp: "6,125,059 EGP", orders: "6,634", trend: null },
-        totalSales: { usdAmount: "$173,843", egpAmount: "11,261,140 EGP", totalEgp: "19,530,440 EGP", orders: "24,589", trend: null },
-        outsideCurrent: { usdAmount: "$1,789", egpAmount: "120,978 EGP", totalEgp: "206,076 EGP", orders: "275", trend: "-1%" },
+        today: { usdAmount: "$0", egpAmount: "1,590 EGP", totalEgp: "1,590 EGP", orders: "11", trend: "-98%" },
+        yesterday: { usdAmount: "$641", egpAmount: "48,067 EGP", totalEgp: "78,570 EGP", orders: "470", trend: "-50%" },
+        currentWeek: { usdAmount: "$641", egpAmount: "49,657 EGP", totalEgp: "80,160 EGP", orders: "481", trend: "-47%" },
+        currentMonth: { usdAmount: "$5,191", egpAmount: "374,276 EGP", totalEgp: "621,301 EGP", orders: "1,436", trend: "-36%" },
+        lastMonth: { usdAmount: "$9,635", egpAmount: "475,940 EGP", totalEgp: "934,457 EGP", orders: "693", trend: "-51%" },
+        currentYear: { usdAmount: "$95,457", egpAmount: "6,944,758 EGP", totalEgp: "11,615,169 EGP", orders: "11,886", trend: null },
+        lastYear: { usdAmount: "$56,596", egpAmount: "3,391,053 EGP", totalEgp: "6,125,173 EGP", orders: "6,634", trend: null },
+        totalSales: { usdAmount: "$173,969", egpAmount: "11,270,972 EGP", totalEgp: "19,549,705 EGP", orders: "24,657", trend: null },
+        outsideCurrent: { usdAmount: "$1,789", egpAmount: "123,955 EGP", totalEgp: "209,089 EGP", orders: "286", trend: "+0%" },
         outsideLast: { usdAmount: "$2,200", egpAmount: "204,199 EGP", totalEgp: "204,199 EGP", orders: "247", trend: "-45%" }
     };
 
     function init() {
-        const cachedContent = localStorage.getItem('last_sales_data');
-        if (cachedContent) {
-            renderDashboard(JSON.parse(cachedContent));
-            updateTimestamp(localStorage.getItem('last_sales_update'));
-        } else {
-            // Force the exact provided data if no cache exists
+        // Only seed demo data if the user has NEVER used the sales report before
+        // This prevents old demo data from coming back after a user clears it or enters their own.
+        const currentData = Storage.get('last_sales_data');
+        const hasBeenWarnedOrUsed = localStorage.getItem('sales_dashboard_initialized');
+        
+        if (!currentData && !hasBeenWarnedOrUsed) {
             localStorage.setItem('last_sales_data', JSON.stringify(DEMO_DATA));
             localStorage.setItem('last_sales_update', Date.now());
-            renderDashboard(DEMO_DATA);
-            updateTimestamp(Date.now());
+            localStorage.setItem('sales_dashboard_initialized', 'true');
         }
     }
 
-    function updateTimestamp(isCached = false, errorMsg = null, source = null) {
+    function updateTimestamp() {
         const span = header.querySelector('#last-updated');
         if (span) {
             const now = new Date();
             const time = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            
-            if (isCached) {
-                const reason = errorMsg ? ` (${errorMsg})` : '';
-                span.innerHTML = `<i class="fa-solid fa-cloud-slash" style="color:#ef4444"></i> <span style="color:rgba(255,255,255,0.4)">مخزنة: ${time}${reason}</span>`;
-            } else if (source === 'LeadSync Streaming Relay') {
-                span.innerHTML = `<span class="streaming-pulse"></span> <span style="color:#ffcc00; font-weight:700;">بث مباشر (Relay): ${time}</span>`;
-            } else {
-                span.innerHTML = `<span class="live-blink"></span> <span style="color:#4ade80">مباشر: ${time}</span>`;
-            }
+            span.innerHTML = `<span style="color:rgba(255,255,255,0.6); font-family:'Cairo'; font-size:0.85rem; font-weight:700;">${time}</span>`;
         }
     }
 
-    header.querySelector('#refresh-sales-btn').onclick = (e) => {
-        const icon = e.currentTarget.querySelector('i');
-        icon.classList.add('spinning');
-        loadData(true).finally(() => icon.classList.remove('spinning'));
-    };
 
     header.querySelector('#reset-sales-btn').onclick = () => {
         if (confirm('هل أنت متأكد من مسح البيانات الحالية والبدء من جديد؟')) {
             Storage.set('last_sales_data', null);
             localStorage.removeItem('last_sales_update');
+            localStorage.setItem('sales_dashboard_initialized', 'true');
             loadData(true);
             Notifications.info('تم مسح البيانات. يمكنك الآن استخدام Relay أو اللصق اليدوي.');
         }
@@ -298,14 +568,12 @@ export async function renderSales() {
     // Event Listeners for Live Updates
     EventBus.on('sales:updated', (payload) => {
         if (container.isConnected) {
-            const data = payload.data || payload;
-            const source = payload.source || null;
-            renderDashboard(data);
-            updateTimestamp(false, null, source);
+            loadData(); // Re-fetch rate and render
         }
     });
 
     // Initial load
+    init();
     loadData();
     return container;
 }
@@ -368,7 +636,7 @@ export async function fetchSalesData(force = false) {
         if (err.message === 'AUTH_EXPIRED') {
             throw new Error('انتهت جلسة تسجيل الدخول. يرجى تسجيل الدخول إلى Almdrasa مرة أخرى.');
         }
-        throw new Error('فشل جلب البيانات برمجياً بسبب قيود الأمان (CORS). يرجى مراجعة إعدادات الإضافة أو استخدام الإدخال اليدوي.');
+        throw new Error('يتطلب الوصول إلى البيانات مزامنة يدوية بسيطة لضمان أعلى مستويات الأمان والدقة.');
     }
 }
 
@@ -386,8 +654,8 @@ export function parseSalesData(html) {
         { key: "today", patterns: ["Today's Sales", "مبيعات اليوم"] },
         { key: "yesterday", patterns: ["Yesterday's Sales", "مبيعات الأمس"] },
         { key: "currentWeek", patterns: ["Current Week", "الأسبوع الحالي"] },
-        { key: "currentMonth", patterns: ["Current month Sales", "مبيعات الشهر الحالي"], mustHaveBoth: true, notHave: ["Out-side"] },
-        { key: "lastMonth", patterns: ["Last month Sales", "مبيعات الشهر السابق", "مبيعات الشهر الماضي"], mustHaveBoth: true, notHave: ["Out-side"] },
+        { key: "currentMonth", patterns: ["Current month", "Sales"], mustHaveBoth: true, notHave: ["Out-side"] },
+        { key: "lastMonth", patterns: ["Last month", "Sales"], mustHaveBoth: true, notHave: ["Out-side"] },
         { key: "currentYear", patterns: ["Current Year", "السنة الحالية", "العام الحالي"] },
         { key: "lastYear", patterns: ["Last Year", "السنة الماضية", "العام السابق"] },
         { key: "totalSales", patterns: ["Total Sales"] },
@@ -401,7 +669,6 @@ export function parseSalesData(html) {
     lines.forEach(line => {
         let matchedKey = null;
         for (const mapping of keyMap) {
-            // Check if any pattern matches (or all if mustHaveBoth)
             const matchesAll = mapping.patterns.every(p => line.toLowerCase().includes(p.toLowerCase()));
             const matchesAny = mapping.patterns.some(p => line.toLowerCase().includes(p.toLowerCase()));
             
@@ -418,7 +685,6 @@ export function parseSalesData(html) {
             currentKey = matchedKey;
             results[currentKey] = { rawText: line };
         } else if (currentKey) {
-            // Only append if it's not a generic repeating line or another header-like line
             if (line.length < 300) { 
                 results[currentKey].rawText += " | " + line;
             }
@@ -427,21 +693,15 @@ export function parseSalesData(html) {
 
     Object.keys(results).forEach(key => {
         const content = results[key].rawText;
-        
-        // Flexible Regex: handles ($100), (100 $), (100 EGP), (Total: 100), (100.00)
-        // More specific check for USD vs EGP
         const usdMatch = content.match(/(\$\s?[\d,.]+)|([\d,.]+\s?\$)|(\$[\d,.]+)/i);
         const egpMatch = content.match(/([\d,.]+\s?EGP)|(EGP\s?[\d,.]+)/i);
         const ordersMatch = content.match(/(Orders|الطلبات|طلب|Orders Count):?\s?([\d,]+)/i);
         const trendMatch = content.match(/([+-]\s?\d+%)(\s*since)?/i);
-
-        // Fallback for unlabeled amounts near the start
         const fallbackAmountMatch = content.match(/([\d,.]+)/);
 
         const clean = (m, group = 0) => {
             if (!m) return null;
             let val = (group === 0 ? m[0] : m[group]).replace(/[^\d.,]/g, '').trim();
-            // Remove trailing dot if exists
             if (val.endsWith('.')) val = val.slice(0, -1);
             return val;
         };
@@ -449,8 +709,6 @@ export function parseSalesData(html) {
         const usdVal = clean(usdMatch);
         const egpVal = clean(egpMatch);
         const ordersVal = clean(ordersMatch, 2);
-        
-        // Logic for total: if it explicitly says Total, or if it's the dominant number
         const totalMatch = content.match(/(Total|الإجمالي|إجمالي|Grand Total):?\s?([\d,.]+)/i);
         const totalVal = clean(totalMatch, 2) || (egpVal && egpVal.length > 3 ? egpVal : null) || clean(fallbackAmountMatch);
 
@@ -464,14 +722,109 @@ export function parseSalesData(html) {
         };
     });
 
-    // Final Validation: Ensure we have at least most of the keys
-    const requiredKeys = ['today', 'yesterday', 'currentWeek', 'currentMonth', 'totalSales'];
-    const foundKeys = Object.keys(results);
-    const missingKeys = requiredKeys.filter(k => !foundKeys.includes(k));
+    return results;
+}
 
-    if (foundKeys.length < 3) {
-        throw new Error('لم يتم العثور على بيانات مبيعات كافية. يرجى التأكد من نسخ الصفحة بصيغة صحيحة.');
+function showEliteAnalyticsHub(data) {
+    if (!data || typeof data !== 'object' || Object.keys(data).length < 2) {
+        return Notifications.warning('يرجى تحديث بيانات المبيعات أولاً للحصول على تحليلات دقيقة.');
     }
 
-    return results;
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.92); backdrop-filter: blur(25px);
+        z-index: 10000; display: flex; align-items: center; justify-content: center;
+        padding: 1rem; direction: rtl;
+    `;
+
+    const parseVal = (str) => {
+        if (!str || str === '---') return 0;
+        const cleaned = str.toString().replace(/[$,\sEGP]/g, '').replace(/,/g, '');
+        return parseFloat(cleaned) || 0;
+    };
+
+    const ctx = getDateContext();
+    const day = ctx.day;
+    const daysInMonth = ctx.daysInMonth;
+    
+    // Core Values Parsing
+    const todayEgp = parseVal(data.today?.totalEgp);
+    const yestEgp = parseVal(data.yesterday?.totalEgp);
+    const monthUsd = parseVal(data.currentMonth?.usdAmount);
+    const lastMonthUsd = parseVal(data.lastMonth?.usdAmount);
+    const yearUsd = parseVal(data.currentYear?.usdAmount);
+    const lastYearUsd = parseVal(data.lastYear?.usdAmount);
+    const totalOrderMonth = parseVal(data.currentMonth?.orders);
+    const outsideUsd = parseVal(data.outsideCurrent?.usdAmount);
+    const targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 10000;
+
+    const metrics = [
+        { title: "متوسط الطلبية اليوم", icon: "fa-calculator", calc: () => (todayEgp / (parseVal(data.today?.orders) || 1)).toLocaleString(undefined, {maximumFractionDigits:0}) + " EGP", desc: "القيمة المتوسطة لكل طلب تم اليوم" },
+        { title: "نمو المبيعات (أمس/اليوم)", icon: "fa-chart-line", calc: () => yestEgp === 0 ? "جديد" : (((todayEgp - yestEgp) / yestEgp) * 100).toFixed(1) + "%", desc: "نسبة التغير في المبيعات بين اليوم وأمس" },
+        { title: "الزخم الشهري الحالي", icon: "fa-bolt", calc: () => (monthUsd / (targetAmount || 1) * 100).toFixed(1) + "%", desc: "مدى التقدم المحقق من الهدف الشهري الكلي" },
+        { title: "توقع إغلاق الشهر", icon: "fa-wand-magic-sparkles", calc: () => "$" + (monthUsd / Math.max(1, day) * daysInMonth).toLocaleString(undefined, {maximumFractionDigits:0}), desc: "المبلغ المتوقع الوصول إليه بنهاية الشهر" },
+        { title: "نسبة المبيعات الخارجية", icon: "fa-globe", calc: () => ((outsideUsd / (monthUsd || 1)) * 100).toFixed(1) + "%", desc: "نسبة المبيعات من خارج التصنيف الأساسي" },
+        { title: "مؤشر كفاءة التحويل", icon: "fa-bullseye", calc: () => (totalOrderMonth / (Math.max(1, monthUsd)/1000)).toFixed(1), desc: "عدد الطلبات لكل 1000 دولار محقق" },
+        { title: "قوة النمو السنوي", icon: "fa-arrow-up-right-dots", calc: () => lastYearUsd === 0 ? "جديد" : (((yearUsd - lastYearUsd) / lastYearUsd) * 100).toFixed(1) + "%", desc: "نسبة نمو السنة الحالية مقارنة بالماضية" },
+        { title: "الاستدامة الائتمانية", icon: "fa-shield-halved", calc: () => (monthUsd > (lastMonthUsd * 0.8) ? "مستقرة" : "تحدي"), desc: "مدى حفاظ المبيعات على مستوياتها التاريخية" },
+        { title: "المعدل اليومي المطلوب", icon: "fa-person-running", calc: () => "$" + (Math.max(0, targetAmount - monthUsd) / Math.max(1, daysInMonth - day)).toLocaleString(undefined, {maximumFractionDigits:0}), desc: "المعدل اليومي المطلوب للوصول للهدف" },
+        { title: "كثافة السوق الأسبوعية", icon: "fa-calendar-week", calc: () => (parseVal(data.currentWeek?.orders) / 7).toFixed(1) + " طلب", desc: "متوسط الطلبات اليومي المحقق هذا الأسبوع" },
+        { title: "سرعة التدفق المالي", icon: "fa-gauge-high", calc: () => (todayEgp / 24).toLocaleString(undefined, {maximumFractionDigits:0}) + " EGP/س", desc: "متوسط الإيراد المحقق في كل ساعة عمل اليوم" },
+        { title: "الوزن النسبي للشهر", icon: "fa-ranking-star", calc: () => ((monthUsd / (yearUsd || 1)) * 100).toFixed(1) + "%", desc: "مساهمة الشهر الحالي من إجمالي السنة" }
+    ];
+
+    modal.innerHTML = `
+        <div style="background: #0a0a0a; border: 2px solid #FFD700; width: 100%; max-width: 1100px; max-height: 90vh; border-radius: 40px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 0 100px rgba(0,0,0,0.9); position: relative;">
+            
+            <div style="padding: 2rem; background: linear-gradient(180deg, rgba(255,215,0,0.15), transparent); border-bottom: 1px solid rgba(255,255,255,0.1); display:flex; justify-content: space-between; align-items: center;">
+                <div style="text-align: right;">
+                    <h2 style="margin:0; color:#FFD700; font-size:2rem; font-family:'Cairo'; font-weight: 800; text-shadow: 0 0 15px rgba(255,215,0,0.4);">بعض التحليلات المبنية على تقرير المبيعات</h2>
+                </div>
+                <button id="close-analytics-btn" style="background:rgba(255,255,255,0.1); border:1px solid #FFD700; color:#FFD700; width:45px; height:45px; border-radius:50%; cursor:pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div style="flex:1; overflow-y: auto; padding: 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.2rem; background: #0f0f0f;">
+                ${metrics.map((m, i) => `
+                    <div class="analytics-item" style="background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 180px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; animation: card-fade-in 0.5s ease forwards; animation-delay: ${i * 0.03}s; opacity: 0; transform: translateY(10px);">
+                        <div style="background: rgba(255,215,0,0.15); width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; border: 1px solid rgba(255,215,0,0.3);">
+                            <i class="fa-solid ${m.icon}" style="color: #FFD700; font-size: 1.4rem;"></i>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #FFD700; font-weight: 700; font-family:'Cairo', sans-serif !important; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">${m.title}</div>
+                        <div style="font-size: 1.7rem; font-weight: 900; color: #FFFFFF !important; font-family:'Cairo', sans-serif !important; margin-bottom: 8px; line-height: 1.2;">${m.calc()}</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); font-family:'Cairo', sans-serif !important; line-height: 1.2; padding: 0 10px;">${m.desc}</div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div style="padding: 1rem; background: #050505; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
+                <span style="color: #FFD700; font-size: 0.85rem; font-family: 'Cairo'; opacity: 0.7;">
+                    <i class="fa-solid fa-shield-halved"></i> تم توليد هذه التحليلات فورياً من البيانات المحفوظة للجهاز | LeadSync Elite Engine v1.0
+                </span>
+            </div>
+        </div>
+        
+        <style>
+            .analytics-item:hover {
+                transform: translateY(-5px) !important;
+                background: #222 !important;
+                border-color: #FFD700 !important;
+                box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.1);
+            }
+            #close-analytics-btn:hover {
+                background: #ef4444 !important;
+                border-color: #ef4444 !important;
+                color: #fff !important;
+            }
+            @keyframes card-fade-in {
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
+    `;
+
+    document.body.appendChild(modal);
+    modal.querySelector('#close-analytics-btn').onclick = () => modal.remove();
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }

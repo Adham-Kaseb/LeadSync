@@ -284,6 +284,9 @@ export async function renderDashboard() {
             const data = Storage.get('last_sales_data') || {};
             const today = data.today || { totalEgp: '---', orders: '---' };
             const total = data.totalSales || { totalEgp: '---' };
+            
+            const timestamp = localStorage.getItem('last_sales_update');
+            const timeStr = timestamp ? new Date(parseInt(timestamp)).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '---';
             const isOld = timestamp && (Date.now() - parseInt(timestamp) > 5 * 60 * 1000);
             
             salesCard.innerHTML = `

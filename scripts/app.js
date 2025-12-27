@@ -2,6 +2,7 @@ import { openAboutModal } from './about.js';
 import { ShortcutsManager } from './shortcuts.js';
 import { initHealthTimer } from './health.js';
 import { syncManager } from './sync.js';
+import { SmoothScroller } from './scroller.js';
 
 let contentArea, navLinks;
 let currentRouteId = 0;
@@ -98,6 +99,9 @@ async function handleRoute() {
         if (routeId !== currentRouteId) return;
         contentArea.innerHTML = '<h2 class="page-enter" style="text-align:center; padding-top:4rem;">404 - Page Not Found</h2>';
     }
+
+    // Always scroll to top on route change
+    if (window.scroller) window.scroller.scrollTo(0);
 }
 
 function initCursor(style) {
@@ -167,6 +171,9 @@ function initApp() {
         if(settings.animationSpeed === 'fast') duration = '0.15s';
         document.documentElement.style.setProperty('--transition-speed', duration);
     }
+
+    // Initialize Smoooooooth Global Scroller
+    window.scroller = new SmoothScroller({ speed: 0.08, strength: 1.0 });
 
     const modules = ['leads', 'almdrasa', 'sales', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles'];
     modules.forEach(mod => {
