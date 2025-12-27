@@ -35,7 +35,8 @@ export function renderSettings() {
         articles: true,
         themeColor: '#FFD700',
         glassBlur: 20,
-        borderRadius: 16
+        borderRadius: 16,
+        lockScreenBg: 'image'
     };
     
     let loadedSettings = Storage.get('app_settings') || {};
@@ -175,6 +176,14 @@ export function renderSettings() {
         </div>
 
         <div style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom:0.8rem; color:var(--text-secondary);">خلفية شاشة القفل</label>
+            <div style="display: flex; gap: 10px;">
+                <button id="bg-image-btn" class="btn ${settings.lockScreenBg === 'image' ? 'btn-primary' : 'btn-secondary'}" style="flex: 1; font-size: 0.85rem;">صورة ثابتة</button>
+                <button id="bg-video-btn" class="btn ${settings.lockScreenBg === 'video' ? 'btn-primary' : 'btn-secondary'}" style="flex: 1; font-size: 0.85rem;">فيديو متحرك</button>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <label style="color:var(--text-secondary);">حجم الخط</label>
                 <span id="font-val" style="color:var(--metallic-gold); font-weight:bold;">100%</span>
@@ -233,6 +242,23 @@ export function renderSettings() {
              circle.style.border = '2px solid #fff';
         }
     });
+
+    const bgImageBtn = combinedPanel.querySelector('#bg-image-btn');
+    const bgVideoBtn = combinedPanel.querySelector('#bg-video-btn');
+
+    bgImageBtn.onclick = () => {
+        settings.lockScreenBg = 'image';
+        Storage.set('app_settings', settings);
+        bgImageBtn.classList.replace('btn-secondary', 'btn-primary');
+        bgVideoBtn.classList.replace('btn-primary', 'btn-secondary');
+    };
+
+    bgVideoBtn.onclick = () => {
+        settings.lockScreenBg = 'video';
+        Storage.set('app_settings', settings);
+        bgVideoBtn.classList.replace('btn-secondary', 'btn-primary');
+        bgImageBtn.classList.replace('btn-primary', 'btn-secondary');
+    };
 
     const shortcutsListContainer = combinedPanel.querySelector('#custom-shortcuts-area');
     const shortcutsList = combinedPanel.querySelector('#shortcuts-list');

@@ -4,108 +4,163 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #000;
+    background: #0d0d0d;
     z-index: 9999;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    gap: 1.5rem;
     overflow: hidden;
+    font-family: 'Cairo', sans-serif;
 }
 
 .lock-bg-overlay {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 50%, rgba(227, 185, 56, 0.1) 0%, transparent 80%);
-    pointer-events: none;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+    backdrop-filter: brightness(0.9);
     z-index: 1;
 }
 
 .lock-container {
-    background: rgba(20, 20, 20, 0.6);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    padding: 3.5rem 2.5rem;
-    border-radius: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 15, 15, 0.4);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    padding: 3rem 2.5rem;
+    border-radius: 48px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     text-align: center;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    box-shadow: 
+        0 40px 100px rgba(0, 0, 0, 0.6),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
     width: 90%;
     max-width: 420px;
-    animation: lockEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: lockPop 1s cubic-bezier(0.19, 1, 0.22, 1);
     position: relative;
-    z-index: 2;
+    z-index: 10;
 }
 
-@keyframes lockEnter {
-    0% { opacity: 0; transform: translateY(30px) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes lockPop {
+    0% { opacity: 0; transform: scale(0.9) translateY(40px); filter: blur(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
 
 .lock-title {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    letter-spacing: -0.5px;
+    gap: 1.5rem;
 }
 
-.lock-title i {
+.lock-title .shield-icon {
+    font-size: 3.5rem;
+    color: #FBBF24;
+    filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.4));
+    animation: pulseShield 3s infinite ease-in-out;
+}
+
+@keyframes pulseShield {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.4)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 40px rgba(251, 191, 36, 0.6)); }
+}
+
+.lock-title h1 {
     font-size: 2.5rem;
-    background: linear-gradient(135deg, var(--metallic-gold), #fff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(227, 185, 56, 0.3));
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -2px;
 }
 
 .lock-subtitle {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 2.5rem;
+    font-weight: 500;
+}
+
+.lock-input-wrapper {
+    position: relative;
     margin-bottom: 2rem;
-    line-height: 1.5;
 }
 
 #app-password {
     width: 100%;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 14px !important;
-    padding: 1rem !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 1.2rem !important;
     color: #fff !important;
-    font-size: 1.2rem !important;
-    transition: all 0.3s ease !important;
-    margin-bottom: 1.5rem !important;
+    font-size: 1.3rem !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     text-align: center !important;
-    letter-spacing: 4px !important;
+    letter-spacing: 0.5rem !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+@keyframes inputGlow {
+    0% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.1); }
+    50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.3); }
+    100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.1); }
 }
 
 #app-password:focus {
-    border-color: var(--metallic-gold) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 0 20px rgba(227, 185, 56, 0.2) !important;
-    pointer-events: auto;
+    border-color: rgba(251, 191, 36, 0.6) !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    animation: inputGlow 2s infinite ease-in-out;
+    outline: none !important;
+    transform: translateY(-2px);
+}
+
+#app-password::placeholder {
+    color: rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.2rem;
 }
 
 #unlock-btn {
     width: 100%;
-    padding: 1.1rem !important;
-    font-size: 1.1rem !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: linear-gradient(135deg, var(--metallic-gold), #dbb500) !important;
+    padding: 1.2rem !important;
+    font-size: 1.4rem !important;
+    background: #FBBF24 !important;
+    color: #000 !important;
     font-weight: 800 !important;
-    border-radius: 14px !important;
-    box-shadow: 0 10px 25px rgba(227, 185, 56, 0.3) !important;
+    border-radius: 20px !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+    box-shadow: 0 10px 40px rgba(251, 191, 36, 0.3) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
 #unlock-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 15px 35px rgba(227, 185, 56, 0.4) !important;
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(251, 191, 36, 0.5) !important;
+    background: #FFD700 !important;
+}
+
+#unlock-btn:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.persona-badge {
+    position: fixed;
+    bottom: 40px;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    z-index: 5;
+}
+
+.persona-badge span {
+    color: rgba(251, 191, 36, 0.5);
+    margin-left: 5px;
 }
 
 .shake {
@@ -113,24 +168,8 @@
 }
 
 @keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
-}
-
-.persona-badge {
-    position: fixed;
-    bottom: 30px;
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    letter-spacing: 2px;
-}
-
-.persona-badge span {
-    color: var(--metallic-gold);
-    font-weight: 900;
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(4px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+    40%, 60% { transform: translate3d(6px, 0, 0); }
 }

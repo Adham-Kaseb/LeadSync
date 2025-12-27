@@ -289,51 +289,64 @@ function createLockScreen() {
     const container = document.createElement('div');
     container.className = 'lock-container';
 
-    const bgImage = document.createElement('img');
-    bgImage.src = 'images/pass-wall.png';
-    bgImage.style.position = 'absolute';
-    bgImage.style.top = '0';
-    bgImage.style.left = '0';
-    bgImage.style.width = '100%';
-    bgImage.style.height = '100%';
-    bgImage.style.objectFit = 'cover';
-    bgImage.style.zIndex = '-1';
-    bgImage.style.opacity = '0.4';
-    lockScreen.appendChild(bgImage);
+    const settings = JSON.parse(localStorage.getItem('app_settings')) || {};
+    const bgType = settings.lockScreenBg || 'image';
 
-    const title = document.createElement('div');
-    title.className = 'lock-title';
-    title.innerHTML = `
-        <i class="fa-solid fa-shield-halved"></i>
-        <span>LeadSync</span>
+    if (bgType === 'video') {
+        const video = document.createElement('video');
+        video.src = 'images/Background_Image_Animation_Complete.mp4';
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.style.position = 'absolute';
+        video.style.top = '0';
+        video.style.left = '0';
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.objectFit = 'cover';
+        video.style.zIndex = '-1';
+        video.style.opacity = '0.8';
+        lockScreen.appendChild(video);
+    } else {
+        const bgImage = document.createElement('img');
+        bgImage.src = 'images/pass-wall.png';
+        bgImage.style.position = 'absolute';
+        bgImage.style.top = '0';
+        bgImage.style.left = '0';
+        bgImage.style.width = '100%';
+        bgImage.style.height = '100%';
+        bgImage.style.objectFit = 'cover';
+        bgImage.style.zIndex = '-1';
+        bgImage.style.opacity = '0.7';
+        lockScreen.appendChild(bgImage);
+    }
+
+    container.innerHTML = `
+        <div class="lock-title">
+            <i class="fa-solid fa-shield-halved shield-icon"></i>
+            <h1>LeadSync</h1>
+        </div>
+        <p class="lock-subtitle">مرحباً بعودتك، يرجى إدخال كلمة المرور للمتابعة</p>
+        <div class="lock-input-wrapper">
+            <input type="password" id="app-password" placeholder="••••••••">
+        </div>
+        <button id="unlock-btn">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span>دخول النظام</span>
+        </button>
     `;
-
-    const subtitle = document.createElement('p');
-    subtitle.className = 'lock-subtitle';
-    subtitle.textContent = 'مرحباً بعودتك، يرجى إدخال كلمة المرور للمتابعة';
-
-    const input = document.createElement('input');
-    input.type = 'password';
-    input.id = 'app-password';
-    input.placeholder = '••••••••';
-    
-    const btn = document.createElement('button');
-    btn.id = 'unlock-btn';
-    btn.className = 'btn btn-primary';
-    btn.textContent = 'دخول النظام';
-
-    container.appendChild(title);
-    container.appendChild(subtitle);
-    container.appendChild(input);
-    container.appendChild(btn);
     lockScreen.appendChild(container);
 
     const personaBadge = document.createElement('div');
     personaBadge.className = 'persona-badge';
-    personaBadge.innerHTML = `SECURE ACCESS BY <span>LEADSYNC</span> v2.0`;
+    personaBadge.innerHTML = `SECURE ACCESS BY <span>LEADSYNC</span> v2.27 `;
     lockScreen.appendChild(personaBadge);
 
     document.body.appendChild(lockScreen);
+
+    const input = lockScreen.querySelector('#app-password');
+    const btn = lockScreen.querySelector('#unlock-btn');
 
     const handleUnlock = () => {
         const password = input.value;
