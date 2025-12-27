@@ -46,7 +46,7 @@ export async function renderDashboard() {
             hijriDate = ''; 
         }
 
-        const currentUserGreeting = sessionStorage.getItem('currentUser') || 'لوحة التحكم';
+        const currentUserGreeting = sessionStorage.getItem('currentUser') || 'الـ HQ';
 
         const header = document.createElement('div');
         header.className = 'section-header';

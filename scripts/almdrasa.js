@@ -22,7 +22,7 @@ export function renderAlmdrasa() {
         
         if (links.length === 0) {
             links = [
-                { id: 'def_1', title: 'لوحة التحكم', url: '#', category: 'main', icon: 'fa-solid fa-chart-pie', timestamp: new Date().toISOString() },
+                { id: 'def_1', title: 'الـ HQ', url: '#', category: 'main', icon: 'fa-solid fa-chart-pie', timestamp: new Date().toISOString() },
                 { id: 'def_2', title: 'الدورات التدريبية', url: '#', category: 'courses', icon: 'fa-solid fa-graduation-cap', timestamp: new Date().toISOString() },
                 { id: 'def_3', title: 'المجتمع', url: '#', category: 'other', icon: 'fa-solid fa-users', timestamp: new Date().toISOString() },
                 { id: 'def_4', title: 'المكتبة', url: '#', category: 'other', icon: 'fa-solid fa-book', timestamp: new Date().toISOString() },
@@ -290,7 +290,7 @@ export function renderAlmdrasa() {
                 <form id="link-form" class="modal-form">
                     <div class="form-group">
                         <label>العنوان</label>
-                        <input id="l-name" class="glass-input" placeholder="مثال: لوحة التحكم" required value="${editingLink ? editingLink.title : ''}">
+                        <input id="l-name" class="glass-input" placeholder="مثال: الـ HQ" required value="${editingLink ? editingLink.title : ''}">
                     </div>
                     
                     <div class="form-group">

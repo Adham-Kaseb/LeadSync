@@ -341,7 +341,7 @@ export function renderSettings() {
 
     function getArabicModuleName(mod) {
         const names = {
-            'dashboard': 'لوحة التحكم',
+            'dashboard': 'الـ HQ',
             'leads': 'العملاء',
             'almdrasa': 'المدرسة',
             'messages': 'الرسائل',

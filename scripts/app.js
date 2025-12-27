@@ -229,7 +229,7 @@ function initMobileUI() {
         
         if (sectionTitle) {
             if (hash === 'dashboard') {
-                sectionTitle.textContent = sessionStorage.getItem('currentUser') || 'لوحة التحكم';
+                sectionTitle.textContent = sessionStorage.getItem('currentUser') || 'الـ HQ';
             } else if (activeNav) {
                 sectionTitle.textContent = activeNav.textContent.trim();
             }

@@ -122,7 +122,7 @@ export function openAboutModal() {
     overlay.className = 'about-modal-overlay';
 
     const features = [
-        { icon: 'fa-house', title: 'لوحة التحكم', desc: 'نظرة عامة على نشاطك ورسائلك.' },
+        { icon: 'fa-house', title: 'الـ HQ', desc: 'نظرة عامة على نشاطك ورسائلك.' },
         { icon: 'fa-users', title: 'العملاء', desc: 'إدارة شاملة لبيانات العملاء.' },
         { icon: 'fa-school', title: 'المدرسة', desc: 'روابط ودورات تعليمية منظمة.' },
         { icon: 'fa-comment-dots', title: 'الرسائل', desc: 'قوالب رسائل جاهزة للرد السريع.' },
