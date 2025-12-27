@@ -165,52 +165,51 @@ export async function renderSales() {
         targetCard.style.border = '1px solid rgba(255, 215, 0, 0.2)';
         
         targetCard.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; position: relative; z-index: 1;">
                 <div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h3 style="margin: 0; color: var(--metallic-gold); font-size: 1.5rem; font-family:'Cairo';">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                        <h3 style="margin: 0; color: var(--metallic-gold); font-size: 1.7rem; font-family:'Cairo'; font-weight: 800; text-shadow: 0 0 20px rgba(255,215,0,0.2);">
                             <i class="fa-solid fa-bullseye"></i> هدف مبيعات الشهر (${monthName})
                         </h3>
-                        <button id="edit-target-btn" class="radio-mini-btn" title="تعديل الهدف" style="width:28px; height:28px; background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2);">
-                            <i class="fa-solid fa-pen" style="font-size:0.7rem; color:var(--metallic-gold);"></i>
+                        <button id="edit-target-btn" class="radio-mini-btn" title="تعديل الهدف" style="width:32px; height:32px; background:rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; cursor: pointer;">
+                            <i class="fa-solid fa-pen" style="font-size:0.75rem; color:var(--metallic-gold);"></i>
                         </button>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
-                        <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 0.95rem; font-family:'Cairo'; font-weight: 600;">الهدف: $${targetAmount.toLocaleString()} <span style="font-size: 0.8rem; opacity: 0.6;">(≈ ${targetEgpVal} EGP)</span></p>
-                        <div id="rate-badge" title="سعر الصرف المباشر من Coinbase - انقر للتعديل يدوياً" style="background: rgba(74, 222, 128, 0.08); color: #4ade80; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.2); font-family:'Inter'; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 6px; backdrop-filter: blur(4px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <span class="live-dot" style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 12px #4ade80; animation: pulse 1.5s infinite; position: relative;">
-                                <span style="position: absolute; inset: -2px; border-radius: 50%; border: 1px solid #4ade80; opacity: 0; animation: pulse-ripple 1.5s infinite;"></span>
-                            </span>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 1.1rem; font-family:'Cairo'; font-weight: 700;">
+                            $${targetAmount.toLocaleString()} <span style="font-size: 0.85rem; color: rgba(255,255,255,0.4); font-weight: 500;">(≈ ${targetEgpVal} EGP)</span>
+                        </p>
+                        <div id="rate-badge" title="سعر الصرف المباشر - انقر للتعديل" style="background: rgba(74, 222, 128, 0.1); color: #4ade80; font-size: 0.8rem; padding: 6px 14px; border-radius: 100px; border: 1px solid rgba(74, 222, 128, 0.2); font-family:'Inter'; cursor: pointer; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);">
+                            <span class="live-pulse" style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80;"></span>
                             <span style="font-weight: 700;">$1 = ${rate} EGP</span>
-                            ${localStorage.getItem('manual_usd_egp_rate') ? '<span style="font-size: 0.65rem; opacity: 0.7; font-family:\'Cairo\'; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 6px;"></span>' : ''}
                         </div>
                     </div>
                 </div>
-                <div style="text-align: left;">
-                    <div style="font-size: 2.5rem; font-weight: 900; color: #fff; font-family:'Inter'; line-height: 1;">${percentAchieved.toFixed(1)}%</div>
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); text-align: right; font-family:'Cairo';">اليوم ${day} من ${daysInMonth}</div>
+                <div class="target-achievement-container">
+                    <div class="target-percent">${percentAchieved.toFixed(1)}%</div>
+                    <div class="target-date-info">اليوم ${day} من ${daysInMonth}</div>
                 </div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.05); height: 16px; border-radius: 20px; overflow: hidden; margin-bottom: 1rem; border: 1px solid rgba(255,215,0,0.1); padding: 2px;">
-                <div style="width: ${percentAchieved}%; height: 100%; border-radius: 20px; background: linear-gradient(90deg, #B8860B, #FFD700); box-shadow: 0 0 20px rgba(255,215,0,0.4); transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
+            <div style="background: rgba(0,0,0,0.4); height: 14px; border-radius: 100px; overflow: hidden; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.05); padding: 3px; position: relative; z-index: 1;">
+                <div class="progress-bar-glow" style="width: ${percentAchieved}%; height: 100%; border-radius: 100px; background: linear-gradient(90deg, #FBBF24, #F59E0B); transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
             </div>
 
-            <p style="font-size: 0.95rem; color: var(--metallic-gold); margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; font-family:'Cairo'; font-weight: 700;">
-                <i class="fa-solid fa-person-running" style="animation: bounce 1s infinite;"></i>
-                تحتاج إلى $${requiredDaily.toLocaleString(undefined, {maximumFractionDigits:0})} يومياً <span style="font-size:0.8rem; opacity:0.7;">(≈ ${(requiredDaily * rate).toLocaleString(undefined, {maximumFractionDigits:0})} EGP)</span> للوصول للهدف.
+            <p style="font-size: 1rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem; display: flex; align-items: center; gap: 12px; font-family:'Cairo'; font-weight: 600; background: rgba(251, 191, 36, 0.05); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(251, 191, 36, 0.1); width: fit-content; position: relative; z-index: 1;">
+                <i class="fa-solid fa-person-running" style="color: #FBBF24; font-size: 1.2rem;"></i>
+                تحتاج إلى <span style="color: #FBBF24; font-weight: 800;">$${requiredDaily.toLocaleString(undefined, {maximumFractionDigits:0})}</span> يومياً <span style="font-size:0.85rem; opacity:0.6;">(≈ ${(requiredDaily * rate).toLocaleString(undefined, {maximumFractionDigits:0})} EGP)</span> للوصول للتارجت إن شاء الله.
             </p>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
-                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-family:'Cairo';">تم تحقيقه بفضل الله</div>
-                    <div style="font-size: 1.6rem; font-weight: 900; color: #4ade80; font-family:'Inter';">$${currentUsdVal.toLocaleString()}</div>
-                    <div style="font-size: 0.9rem; color: rgba(74, 222, 128, 0.6); font-family:'Inter'; font-weight: 600;">≈ ${currentEgpVal} EGP</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; position: relative; z-index: 1;">
+                <div class="target-stat-box" style="padding: 1.5rem; border-radius: 24px; text-align: center;">
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.4); margin-bottom: 10px; font-family:'Cairo'; font-weight: 600;">تم تحقيقه بفضل الله</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #4ade80; font-family:'Inter'; letter-spacing: -1px;">$${currentUsdVal.toLocaleString()}</div>
+                    <div style="font-size: 0.95rem; color: rgba(74, 222, 128, 0.6); font-family:'Inter'; font-weight: 600; margin-top: 4px;">≈ ${currentEgpVal} EGP</div>
                 </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
-                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-family:'Cairo';">متبقي للهدف إن شاء الله</div>
-                    <div style="font-size: 1.6rem; font-weight: 900; color: #f87171; font-family:'Inter';">$${remainingVal.toLocaleString()}</div>
-                    <div style="font-size: 0.9rem; color: rgba(248, 113, 113, 0.6); font-family:'Inter'; font-weight: 600;">≈ ${remainingEgpVal} EGP</div>
+                <div class="target-stat-box" style="padding: 1.5rem; border-radius: 24px; text-align: center;">
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.4); margin-bottom: 10px; font-family:'Cairo'; font-weight: 600;">متبقي للهدف إن شاء الله</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #f87171; font-family:'Inter'; letter-spacing: -1px;">$${remainingVal.toLocaleString()}</div>
+                    <div style="font-size: 0.95rem; color: rgba(248, 113, 113, 0.6); font-family:'Inter'; font-weight: 600; margin-top: 4px;">≈ ${remainingEgpVal} EGP</div>
                 </div>
             </div>
         `;

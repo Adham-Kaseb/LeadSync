@@ -718,3 +718,95 @@
 .dash-refresh-btn i {
     font-size: 0.85rem;
 }
+/* Professional Target Progress Card */
+.target-progress-card {
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(40, 40, 40, 0.4) 100%) !important;
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 32px !important;
+    border: 1px solid rgba(251, 191, 36, 0.2) !important;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.4),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.target-progress-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(251, 191, 36, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.target-achievement-container {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 1;
+    position: relative;
+}
+
+.target-percent {
+    font-size: 3.5rem !important;
+    font-weight: 900 !important;
+    font-family: 'Inter', sans-serif !important;
+    line-height: 1 !important;
+    background: linear-gradient(180deg, #FFFFFF 30%, #FBBF24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+    letter-spacing: -2px !important;
+    animation: countUp 1.5s cubic-bezier(0.1, 0.5, 0.1, 1);
+}
+
+.target-date-info {
+    font-size: 0.85rem !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-family: 'Cairo', sans-serif !important;
+    margin-top: 8px !important;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 14px !important;
+    border-radius: 100px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.target-date-info::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--metallic-gold);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--metallic-gold);
+}
+
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.progress-bar-glow {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4), 0 0 40px rgba(251, 191, 36, 0.2);
+}
+
+.target-stat-box {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.3s ease !important;
+}
+
+.target-stat-box:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-2px);
+}
