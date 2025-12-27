@@ -111,7 +111,7 @@ const DOM = {
                     <div class="analytic-icon" style="background:rgba(231, 76, 60, 0.1); color:#e74c3c;"><i class="fa-solid fa-user-xmark"></i></div>
                     <div class="analytic-info">
                         <span class="value">${lost}</span>
-                        <span class="label">خسارة</span>
+                        <span class="label">لم يتم</span>
                     </div>
                 </div>
             </div>

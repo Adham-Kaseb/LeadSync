@@ -177,9 +177,12 @@ const Utils = {
             customOpt.innerHTML = opt.innerHTML;
             
             customOpt.onclick = (e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation();
                 selectElement.selectedIndex = idx;
-                selectElement.dispatchEvent(new Event('change'));
+                selectElement.value = opt.value;
+                selectElement.dispatchEvent(new Event('change', { bubbles: true }));
                 trigger.querySelector('span').innerHTML = opt.innerHTML;
                 optionsList.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
                 customOpt.classList.add('selected');
