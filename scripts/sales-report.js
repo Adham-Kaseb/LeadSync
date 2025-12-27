@@ -54,7 +54,19 @@ const getDateContext = () => {
     const year = now.getFullYear();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const remainingDays = Math.max(1, daysInMonth - day + 1); 
-    return { day, daysInMonth, remainingDays, monthName: now.toLocaleDateString('ar-EG', { month: 'long' }) };
+
+    // Calculate Week Range (Saturday to Friday)
+    const currentDay = now.getDay(); // 0: Sun, 1: Mon, ..., 6: Sat
+    const diffToSat = (currentDay + 1) % 7; 
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - diffToSat);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    const dateOptions = { month: 'short', day: 'numeric' };
+    const weekRange = `${weekStart.toLocaleDateString('ar-EG', dateOptions)} - ${weekEnd.toLocaleDateString('ar-EG', dateOptions)}`;
+
+    return { day, daysInMonth, remainingDays, monthName: now.toLocaleDateString('ar-EG', { month: 'long' }), weekRange };
 };
 
 export async function renderSales() {
@@ -139,7 +151,7 @@ export async function renderSales() {
 
     function renderDashboard(data, rate = 50.0) {
         contentArea.innerHTML = '';
-        const { day, daysInMonth, remainingDays, monthName } = getDateContext();
+        const { day, daysInMonth, remainingDays, monthName, weekRange } = getDateContext();
 
         // Target Logic
         let targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 10000;
@@ -295,7 +307,11 @@ export async function renderSales() {
 
             card.innerHTML = `
                 <div class="sales-card-header">
-                    <div class="sales-card-label">${periodLabels[key] || key}</div>
+                    <div>
+                        <div class="sales-card-label">${periodLabels[key] || key}</div>
+                        ${key === 'currentWeek' ? `<div class="sales-card-meta">${weekRange}</div>` : ''}
+                        ${key === 'today' ? `<div class="sales-card-meta">${new Date().toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })}</div>` : ''}
+                    </div>
                     <div class="sales-card-icon">
                         <i class="fa-solid ${periodIcons[key] || 'fa-chart-simple'}"></i>
                     </div>

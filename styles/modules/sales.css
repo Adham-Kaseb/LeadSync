@@ -810,3 +810,12 @@
     border-color: rgba(255, 255, 255, 0.1) !important;
     transform: translateY(-2px);
 }
+
+.sales-card-meta {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Cairo', sans-serif;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
