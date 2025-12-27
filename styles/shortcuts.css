@@ -8,13 +8,16 @@
     gap: 3px;
     pointer-events: none;
     z-index: 10;
-    opacity: 0.8;
-    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     direction: ltr;
 }
 
 .nav-item:hover .shortcut-badge {
     opacity: 1;
+    visibility: visible;
+    transition-delay: 1.5s;
 }
 
 .key-cap {
