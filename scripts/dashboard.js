@@ -180,7 +180,9 @@ export async function renderDashboard() {
             reminders: { label: 'التذكيرات', icon: 'fa-bell' },
             articles: { label: 'المقالات', icon: 'fa-newspaper' },
             tvmode: { label: 'التلفاز', icon: 'fa-tv' },
-            whatsapp: { label: 'واتساب', icon: 'fa-square-phone' }
+            whatsapp: { label: 'واتساب', icon: 'fa-square-phone' },
+            meetings: { label: 'الاجتماعات', icon: 'fa-handshake' },
+            sales: { label: 'المبيعات', icon: 'fa-chart-pie' }
         };
 
         const renderActions = () => {

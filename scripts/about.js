@@ -132,6 +132,8 @@ export function openAboutModal() {
         { icon: 'fa-calculator', title: 'الخصومات', desc: 'حسابات سريعة ومعقدة.' },
         { icon: 'fa-bell', title: 'التذكيرات', desc: 'تنبيهات للمواعيد المهمة.' },
         { icon: 'fa-calendar-days', title: 'التقويم', desc: 'تنظيم جدولك الزمني.' },
+        { icon: 'fa-handshake', title: 'الاجتماعات', desc: 'إدارة وتنظيم اجتماعاتك القادمة.' },
+        { icon: 'fa-chart-pie', title: 'المبيعات', desc: 'تقارير وتحليلات المبيعات اليومية.' },
         { icon: 'fa-newspaper', title: 'المقالات', desc: 'محرر نصوص متطور ومؤثرات.' },
         { icon: 'fa-gear', title: 'الإعدادات', desc: 'تخصيص التطبيق وقفل الشاشة.' }
     ];

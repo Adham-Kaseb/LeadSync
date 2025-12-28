@@ -23,7 +23,8 @@ const routes = {
     tvmode: async () => (await import('./tv-mode.js')).renderTVMode(),
     whatsapp: async () => (await import('./whatsapp-hub.js')).renderWhatsAppHub(),
     settings: async () => (await import('./settings.js')).renderSettings(),
-    sales: async () => (await import('./sales-report.js')).renderSales()
+    sales: async () => (await import('./sales-report.js')).renderSales(),
+    meetings: async () => (await import('./meetings.js')).renderMeetings()
 };
 
 async function handleRoute() {
@@ -175,7 +176,7 @@ function initApp() {
     // Initialize Smoooooooth Global Scroller
     window.scroller = new SmoothScroller({ speed: 0.08, strength: 1.0 });
 
-    const modules = ['leads', 'almdrasa', 'sales', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles'];
+    const modules = ['leads', 'almdrasa', 'sales', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles', 'meetings'];
     modules.forEach(mod => {
         const target = mod; 
         const navLink = document.querySelector(`a[data-target="${target}"]`);
