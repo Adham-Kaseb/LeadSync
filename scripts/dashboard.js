@@ -607,6 +607,7 @@ export async function renderDashboard() {
              let peakHoldCounters = new Array(barCount).fill(0);
 
              const animateWave = () => {
+                 if (!radioContainer.isConnected) return;
                  if (radio.state === 'playing') {
                      const freqData = radio.getFrequencyData();
                      time += 0.012; 

@@ -3,7 +3,13 @@ import './lib/Howler.js';
 const { Howl, Howler } = window; 
 
 export class QuranRadio {
+    static instance = null;
+
     constructor() {
+        if (QuranRadio.instance) {
+            return QuranRadio.instance;
+        }
+
         this.sound = null;
         this.state = 'idle'; 
         this.analyser = null;
@@ -38,6 +44,8 @@ export class QuranRadio {
         
         this.onStateChange = null;
         this.initApi();
+        
+        QuranRadio.instance = this;
     }
 
     async initApi() {
