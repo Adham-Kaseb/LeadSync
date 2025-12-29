@@ -47,28 +47,37 @@ export async function renderDashboard() {
         }
 
         const currentUserGreeting = sessionStorage.getItem('currentUser') || 'الـ HQ';
+        const rawName = currentUserGreeting.includes(':') ? currentUserGreeting.split(':')[1].trim() : currentUserGreeting;
+        const userInitial = rawName.charAt(0);
 
         const header = document.createElement('div');
-        header.className = 'section-header';
-        header.style.alignItems = 'center'; 
+        header.className = 'dashboard-header-container';
         header.innerHTML = `
-            <div>
-                <h1 class="section-title">${currentUserGreeting}</h1>
-                <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
-                    <div style="background:rgba(255,215,0,0.1); padding:6px 14px; border-radius:12px; border:1px solid rgba(255,215,0,0.2); display:flex; align-items:center; gap:8px;">
-                        <i class="fa-solid fa-moon" style="color:var(--metallic-gold); font-size:0.85rem;"></i>
-                        <span style="color:var(--metallic-gold); font-weight:700; font-size:0.9rem;">${hijriDate}</span>
-                    </div>
-                    <div style="color:var(--text-secondary); font-size:0.85rem; display:flex; align-items:center; gap:6px; opacity:0.8;">
-                        <i class="fa-regular fa-calendar"></i>
-                        <span>${gregorianDate}</span>
+            <div class="welcome-card">
+                <div class="user-profile">
+                    <div class="user-avatar">${userInitial}</div>
+                    <div class="welcome-info">
+                        <span class="welcome-label">مرحباً بك مجدداً</span>
+                        <h1 class="user-name">${rawName}</h1>
+                        <div class="date-badge-container">
+                            <div class="date-badge gold-badge">
+                                <i class="fa-solid fa-moon"></i>
+                                <span>${hijriDate}</span>
+                            </div>
+                            <div class="date-badge">
+                                <i class="fa-regular fa-calendar"></i>
+                                <span>${gregorianDate}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div id="clock-display" class="digital-clock" style="direction: ltr;">
-                <span class="clock-part" id="clock-h">12</span><span class="clock-colon">:</span><span class="clock-part" id="clock-m">00</span>
-                <div class="clock-ampm" id="clock-p" style="margin-left: 10px;">PM</div>
+                
+                <div class="header-clock-section">
+                    <div id="clock-display" class="digital-clock" style="direction: ltr;">
+                        <span class="clock-part" id="clock-h">12</span><span class="clock-colon">:</span><span class="clock-part" id="clock-m">00</span>
+                        <div class="clock-ampm" id="clock-p" style="margin-left: 10px;">PM</div>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -185,24 +194,47 @@ export async function renderDashboard() {
             sales: { label: 'المبيعات', icon: 'fa-chart-pie' }
         };
 
+        const externalLinks = [
+            { label: 'الأوردرات', icon: 'fa-cart-shopping', url: 'https://almdrasa.com/wp-admin/edit.php?post_type=shop_order' },
+            { label: 'الاشتراكات', icon: 'fa-repeat', url: 'https://almdrasa.com/wp-admin/edit.php?post_type=shop_subscription' },
+            { label: 'المبيعات الخارجية', icon: 'fa-chart-line', url: 'https://almdrasa.com/wp-admin/admin.php?page=almdrasa-sales-outside-almdrasa' },
+            { label: 'المستخدمين', icon: 'fa-user-gear', url: 'https://almdrasa.com/wp-admin/users.php' },
+            { label: 'التسليمات', icon: 'fa-file-signature', url: 'https://almdrasa.com/wp-admin/edit.php?post_type=sfwd-assignment' }
+        ];
+
+        let showingExternal = false;
         const renderActions = () => {
             const savedActions = JSON.parse(localStorage.getItem('quick_actions') || '["leads", "notes", "calculator", "calendar", "settings"]');
             
             actionCard.innerHTML = `
+                <div class="card-hint-overlay">
+                    <div class="hint-text">
+                        <i class="fa-solid fa-keyboard"></i> اضغط <span style="color:#fff; font-weight:bold;">R</span> للتبديل
+                    </div>
+                </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-                    <h3 style="margin:0;"><i class="fa-solid fa-bolt gold-text"></i> إجراءات سريعة</h3>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3 style="margin:0;"><i class="fa-solid fa-bolt gold-text"></i> إجراءات سريعة</h3>
+                    </div>
                     <button class="radio-mini-btn edit-actions-btn" title="تعديل الإجراءات" style="width:30px; height:30px; margin:0!important; background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2);">
                         <i class="fa-solid fa-pen-to-square" style="font-size:0.8rem; color:var(--metallic-gold);"></i>
                     </button>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
-                    ${savedActions.map(key => {
-                        const action = allPossibleActions[key];
-                        if (!action) return '';
-                        return `<button class="btn btn-glass" onclick="location.hash='#${key}'">
-                            <i class="fa-solid ${action.icon}"></i> ${action.label}
-                        </button>`;
-                    }).join('')}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; animation: fadeIn 0.3s ease;">
+                    ${showingExternal 
+                        ? externalLinks.map(link => `
+                            <a href="${link.url}" target="_blank" class="btn btn-glass" style="text-decoration: none;">
+                                <i class="fa-solid ${link.icon}"></i> ${link.label}
+                            </a>
+                        `).join('')
+                        : savedActions.map(key => {
+                            const action = allPossibleActions[key];
+                            if (!action) return '';
+                            return `<button class="btn btn-glass" onclick="location.hash='#${key}'">
+                                <i class="fa-solid ${action.icon}"></i> ${action.label}
+                            </button>`;
+                        }).join('')
+                    }
                 </div>
             `;
 
@@ -681,6 +713,22 @@ export async function renderDashboard() {
              animateWave();
 
         }, 50);
+
+        // Keyboard toggle for Quick Actions
+        const handleKeyPress = (e) => {
+            if (e.key.toLowerCase() === 'r') {
+                if (!document.body.contains(container)) {
+                    window.removeEventListener('keydown', handleKeyPress);
+                    return;
+                }
+                // Only trigger if no input/textarea is focused
+                if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+                
+                showingExternal = !showingExternal;
+                renderActions();
+            }
+        };
+        window.addEventListener('keydown', handleKeyPress);
 
         return container;
 

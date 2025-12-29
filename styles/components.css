@@ -119,13 +119,16 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.05);
     pointer-events: auto;
-    
     transform: translateX(100%);
     opacity: 0;
     transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s;
 }
 
 .toast i { font-size: 1.1rem; }
+
+.hint-text {
+    color: #ffffff5b;
+}
 
 .spinner {
     width: 24px;
@@ -447,4 +450,118 @@ input:checked + .slider::after {
 
 .search-wrapper .glass-input:focus {
     background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Welcome Card & Dashboard Header */
+.dashboard-header-container {
+    margin-bottom: 2.5rem;
+    animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.welcome-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: 24px;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+    transform: rotate(-45deg);
+    pointer-events: none;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-avatar {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--metallic-gold), #dbb500);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #000;
+    box-shadow: 0 8px 16px rgba(255, 215, 0, 0.2);
+}
+
+.welcome-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.welcome-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+.user-name {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.date-badge-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.date-badge {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gold-badge {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.2);
+    color: var(--metallic-gold);
+    font-weight: 700;
+}
+
+@media (max-width: 992px) {
+    .welcome-card {
+        flex-direction: column;
+        gap: 2rem;
+        align-items: flex-start;
+        padding: 1.5rem;
+    }
+    
+    .header-clock-section {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
 }
