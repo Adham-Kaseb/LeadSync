@@ -23,6 +23,7 @@ const routes = {
     tvmode: async () => (await import('./tv-mode.js')).renderTVMode(),
     whatsapp: async () => (await import('./whatsapp-hub.js')).renderWhatsAppHub(),
     settings: async () => (await import('./settings.js')).renderSettings(),
+    passwords: async () => (await import('./passwords.js')).renderPasswords(),
     sales: async () => (await import('./sales-report.js')).renderSales(),
     meetings: async () => (await import('./meetings.js')).renderMeetings()
 };

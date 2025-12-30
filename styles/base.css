@@ -139,7 +139,6 @@ body {
     line-height: var(--line-height-body);
     font-size: var(--font-size-base);
     
-    background: radial-gradient(circle at 15% 50%, #1a1a1a 0%, #2d2d2d 100%); 
     background-size: cover;
     background-attachment: fixed !important; 
 }

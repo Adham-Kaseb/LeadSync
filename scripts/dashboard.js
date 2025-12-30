@@ -49,13 +49,13 @@ export async function renderDashboard() {
         const currentUserGreeting = sessionStorage.getItem('currentUser') || 'الـ HQ';
         const rawName = currentUserGreeting.includes(':') ? currentUserGreeting.split(':')[1].trim() : currentUserGreeting;
         const userInitial = rawName.charAt(0);
+        const storedAvatar = localStorage.getItem('user_profile_image');
 
         const header = document.createElement('div');
         header.className = 'dashboard-header-container';
         header.innerHTML = `
             <div class="welcome-card">
                 <div class="user-profile">
-                    <div class="user-avatar">${userInitial}</div>
                     <div class="welcome-info">
                         <span class="welcome-label">مرحباً بك مجدداً</span>
                         <h1 class="user-name">${rawName}</h1>
@@ -124,6 +124,35 @@ export async function renderDashboard() {
             header.querySelector('#clock-m').innerText = m.toString().padStart(2, '0');
             header.querySelector('#clock-p').innerText = ampm;
         } catch(e) { console.error('Clock init error', e); }
+
+        const avatar = header.querySelector('#main-user-avatar');
+        const avatarInput = header.querySelector('#avatar-input');
+
+        if (avatar && avatarInput) {
+            avatar.onclick = () => avatarInput.click();
+            avatarInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const base64 = event.target.result;
+                        localStorage.setItem('user_profile_image', base64);
+                        avatar.style.backgroundImage = `url(${base64})`;
+                        avatar.style.backgroundSize = 'cover';
+                        avatar.style.backgroundPosition = 'center';
+                        avatar.style.fontSize = '0';
+                        avatar.innerHTML = '<input type="file" id="avatar-input" style="display: none;" accept="image/*">';
+                        
+                        // Re-bind input after innerHTML wipe
+                        const newInput = avatar.querySelector('#avatar-input');
+                        newInput.onchange = avatarInput.onchange;
+                        
+                        import('./core.js').then(m => m.Notifications.success('تم تحديث الصورة الشخصية بنجاح'));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+        }
 
         container.appendChild(header);
 
@@ -197,7 +226,7 @@ export async function renderDashboard() {
         const externalLinks = [
             { label: 'الأوردرات', icon: 'fa-cart-shopping', url: 'https://almdrasa.com/wp-admin/edit.php?post_type=shop_order' },
             { label: 'الاشتراكات', icon: 'fa-repeat', url: 'https://almdrasa.com/wp-admin/edit.php?post_type=shop_subscription' },
-            { label: 'المبيعات الخارجية', icon: 'fa-chart-line', url: 'https://almdrasa.com/wp-admin/admin.php?page=almdrasa-sales-outside-almdrasa' },
+            { label: 'الـoutsales', icon: 'fa-chart-line', url: 'https://almdrasa.com/wp-admin/admin.php?page=almdrasa-sales-outside-almdrasa' },
             { label: 'المستخدمين', icon: 'fa-user-gear', url: 'https://almdrasa.com/wp-admin/users.php' },
             { label: 'التسليمات', icon: 'fa-file-signature', url: 'https://almdrasa.com/wp-admin/edit.php?post_type=sfwd-assignment' }
         ];
