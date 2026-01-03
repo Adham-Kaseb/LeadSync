@@ -1,111 +1,233 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LeadSync</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="shortcut icon" href="images/222.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles/modules/leads.css">
-    <link rel="stylesheet" href="styles/modules/sales.css">
-    <link rel="stylesheet" href="styles/modules/meetings.css">
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="shortcut icon" href="images/222.ico" type="image/x-icon" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Cairo:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/modules/leads.css" />
+    <link rel="stylesheet" href="styles/modules/sales.css" />
+    <link rel="stylesheet" href="styles/modules/meetings.css" />
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="//unpkg.com/force-graph"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="mobile-top-bar glass-panel">
-        <h1 id="mobile-section-title">الـHQ</h1>
-        <div class="header-clock" id="header-clock">--:--</div>
-        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-            <i class="fa-solid fa-grid-2"></i>
-        </button>
+      <h1 id="mobile-section-title">الـHQ</h1>
+      <div class="header-clock" id="header-clock">--:--</div>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+        <i class="fa-solid fa-grid-2"></i>
+      </button>
     </div>
 
     <div class="app-container">
-        <nav class="sidebar glass-panel">
-            <ul class="nav-links">
-                <li><a href="#dashboard" class="nav-item active" data-target="dashboard"><i class="fa-solid fa-house"></i> الـ HQ</a></li>
-                <li><a href="#leads" class="nav-item" data-target="leads"><i class="fa-solid fa-users"></i> العملاء</a></li>
-                <li><a href="#almdrasa" class="nav-item" data-target="almdrasa"><i class="fa-solid fa-school"></i> المدرسة</a></li>
-                <li><a href="#messages" class="nav-item" data-target="messages"><i class="fa-solid fa-comment-dots"></i> الرسائل</a></li>
-                <li><a href="#notes" class="nav-item" data-target="notes"><i class="fa-solid fa-note-sticky"></i> الملاحظات</a></li>
-                <li><a href="#links" class="nav-item" data-target="links"><i class="fa-solid fa-link"></i> الروابط</a></li>
-                <li><a href="#calculator" class="nav-item" data-target="calculator"><i class="fa-solid fa-calculator"></i> الخصومات</a></li>
-                <li><a href="#reminders" class="nav-item" data-target="reminders"><i class="fa-solid fa-bell"></i> التذكيرات</a></li>
-                <li><a href="#calendar" class="nav-item" data-target="calendar"><i class="fa-solid fa-calendar-days"></i> التقويم</a></li>
-                <li><a href="#articles" class="nav-item" data-target="articles"><i class="fa-solid fa-newspaper"></i> المقالات</a></li>
-                <li><a href="#sales" class="nav-item" data-target="sales"><i class="fa-solid fa-chart-line"></i> تقرير المبيعات</a></li>
-                <li><a href="#meetings" class="nav-item" data-target="meetings"><i class="fa-solid fa-handshake"></i> مواعيد الاجتماعات</a></li>
-                <li class="nav-dropdown-container">
-                    <div class="nav-item dropdown-trigger" id="settings-dropdown-trigger">
-                        <i class="fa-solid fa-screwdriver-wrench"></i> <span>الأدوات والإعدادات</span>
-                        <i class="fa-solid fa-chevron-down arrow"></i>
-                    </div>
-                    <ul class="nav-submenu" id="settings-submenu">
-                        <li><a href="#tvmode" class="nav-item" data-target="tvmode"><i class="fa-solid fa-tv"></i> التلفاز</a></li>
-                        <li><a href="#whatsapp" class="nav-item" data-target="whatsapp"><i class="fa-solid fa-square-phone"></i> واتساب</a></li>
-                        <li><a href="#passwords" class="nav-item" data-target="passwords"><i class="fa-solid fa-vault"></i> إدارة كلمات المرور</a></li>
-                        <li><a href="#settings" class="nav-item" data-target="settings"><i class="fa-solid fa-gear"></i> الإعدادات الرئيسية</a></li>
-                    </ul>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer" id="app-info-trigger" style="margin-top: auto; padding-top: 20px;">
-                <div style="
-                    background: rgba(255, 255, 255, 0.03); 
-                    border: 1px solid rgba(255, 255, 255, 0.08); 
-                    border-radius: 12px; 
-                    padding: 12px; 
-                    display: flex; 
-                    align-items: center; 
-                    gap: 12px; 
-                    cursor: pointer; 
-                    transition: all 0.3s ease;
-                "
-                onmouseover="this.style.background='rgba(255, 215, 0, 0.05)'; this.style.borderColor='rgba(255, 215, 0, 0.3)'; this.style.transform='translateY(-2px)';"
-                onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.08)'; this.style.transform='translateY(0)';"
-                >
-                    <div style="
-                        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05)); 
-                        width: 36px; 
-                        height: 36px; 
-                        border-radius: 50%; 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: center;
-                        border: 1px solid rgba(255, 215, 0, 0.2);
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-                    ">
-                        <i class="fa-solid fa-crown" style="color: var(--metallic-gold); font-size: 0.9rem;"></i>
-                    </div>
-                    <div>
-                        <p style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">LeadSync</p>
-                        <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); font-family: 'Inter', sans-serif;">v1.27.0 • Elite Edition</p>
-                    </div>
-                </div>
+      <nav class="sidebar glass-panel">
+        <ul class="nav-links">
+          <li>
+            <a href="#dashboard" class="nav-item active" data-target="dashboard"
+              ><i class="fa-solid fa-house"></i> الـ HQ</a
+            >
+          </li>
+          <li>
+            <a href="#leads" class="nav-item" data-target="leads"
+              ><i class="fa-solid fa-users"></i> العملاء</a
+            >
+          </li>
+          <li>
+            <a href="#almdrasa" class="nav-item" data-target="almdrasa"
+              ><i class="fa-solid fa-school"></i> المدرسة</a
+            >
+          </li>
+          <li>
+            <a href="#messages" class="nav-item" data-target="messages"
+              ><i class="fa-solid fa-comment-dots"></i> الرسائل</a
+            >
+          </li>
+          <li>
+            <a href="#notes" class="nav-item" data-target="notes"
+              ><i class="fa-solid fa-note-sticky"></i> الملاحظات</a
+            >
+          </li>
+          <li>
+            <a href="#links" class="nav-item" data-target="links"
+              ><i class="fa-solid fa-link"></i> الروابط</a
+            >
+          </li>
+          <li>
+            <a href="#calculator" class="nav-item" data-target="calculator"
+              ><i class="fa-solid fa-calculator"></i> الخصومات</a
+            >
+          </li>
+          <li>
+            <a href="#reminders" class="nav-item" data-target="reminders"
+              ><i class="fa-solid fa-bell"></i> التذكيرات</a
+            >
+          </li>
+          <li>
+            <a href="#calendar" class="nav-item" data-target="calendar"
+              ><i class="fa-solid fa-calendar-days"></i> التقويم</a
+            >
+          </li>
+          <li>
+            <a href="#articles" class="nav-item" data-target="articles"
+              ><i class="fa-solid fa-newspaper"></i> المقالات</a
+            >
+          </li>
+          <li>
+            <a href="#sales" class="nav-item" data-target="sales"
+              ><i class="fa-solid fa-chart-line"></i> تقرير المبيعات</a
+            >
+          </li>
+          <li>
+            <a href="#meetings" class="nav-item" data-target="meetings"
+              ><i class="fa-solid fa-handshake"></i> مواعيد الاجتماعات</a
+            >
+          </li>
+          <li class="nav-dropdown-container">
+            <div
+              class="nav-item dropdown-trigger"
+              id="settings-dropdown-trigger"
+            >
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+              <span>الأدوات والإعدادات</span>
+              <i class="fa-solid fa-chevron-down arrow"></i>
             </div>
-        </nav>
+            <ul class="nav-submenu" id="settings-submenu">
+              <li>
+                <a href="#tvmode" class="nav-item" data-target="tvmode"
+                  ><i class="fa-solid fa-tv"></i> التلفاز</a
+                >
+              </li>
+              <li>
+                <a href="#whatsapp" class="nav-item" data-target="whatsapp"
+                  ><i class="fa-solid fa-square-phone"></i> واتساب</a
+                >
+              </li>
+              <li>
+                <a href="#passwords" class="nav-item" data-target="passwords"
+                  ><i class="fa-solid fa-vault"></i> إدارة كلمات المرور</a
+                >
+              </li>
+              <li>
+                <a href="#settings" class="nav-item" data-target="settings"
+                  ><i class="fa-solid fa-gear"></i> الإعدادات الرئيسية</a
+                >
+              </li>
+            </ul>
+          </li>
+        </ul>
 
-        <main id="app-content" class="content-area glass-panel">
-            <div id="loading" class="loading-spinner"></div>
-        </main>
-
-        <div class="mobile-dock">
-            <a href="#dashboard" class="dock-item" data-target="dashboard"><i class="fa-solid fa-house"></i></a>
-            <a href="#leads" class="dock-item" data-target="leads"><i class="fa-solid fa-users"></i></a>
-            <button class="dock-item action-btn" id="mobile-launcher-btn"><i class="fa-solid fa-grid-2"></i></button>
-            <a href="#messages" class="dock-item" data-target="messages"><i class="fa-solid fa-comment-dots"></i></a>
-            <a href="#settings" class="dock-item" data-target="settings"><i class="fa-solid fa-gear"></i></a>
+        <div
+          class="sidebar-footer"
+          id="app-info-trigger"
+          style="margin-top: auto; padding-top: 20px"
+        >
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.03);
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              border-radius: 12px;
+              padding: 12px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              cursor: pointer;
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.background='rgba(255, 215, 0, 0.05)'; this.style.borderColor='rgba(255, 215, 0, 0.3)'; this.style.transform='translateY(-2px)';"
+            onmouseout="this.style.background='rgba(255, 255, 255, 0.03)'; this.style.borderColor='rgba(255, 255, 255, 0.08)'; this.style.transform='translateY(0)';"
+          >
+            <div
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(255, 215, 0, 0.1),
+                  rgba(255, 215, 0, 0.05)
+                );
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(255, 215, 0, 0.2);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+              "
+            >
+              <i
+                class="fa-solid fa-crown"
+                style="color: var(--metallic-gold); font-size: 0.9rem"
+              ></i>
+            </div>
+            <div>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  font-weight: 700;
+                  color: #fff;
+                  margin-bottom: 2px;
+                  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                "
+              >
+                LeadSync
+              </p>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  color: rgba(255, 255, 255, 0.5);
+                  font-family: 'Inter', sans-serif;
+                "
+              >
+                v1.27.0 • Elite Edition
+              </p>
+            </div>
+          </div>
         </div>
+      </nav>
+
+      <main id="app-content" class="content-area glass-panel">
+        <div id="loading" class="loading-spinner"></div>
+      </main>
+
+      <div class="mobile-dock">
+        <a href="#dashboard" class="dock-item" data-target="dashboard"
+          ><i class="fa-solid fa-house"></i
+        ></a>
+        <a href="#leads" class="dock-item" data-target="leads"
+          ><i class="fa-solid fa-users"></i
+        ></a>
+        <button class="dock-item action-btn" id="mobile-launcher-btn">
+          <i class="fa-solid fa-grid-2"></i>
+        </button>
+        <a href="#messages" class="dock-item" data-target="messages"
+          ><i class="fa-solid fa-comment-dots"></i
+        ></a>
+        <a href="#settings" class="dock-item" data-target="settings"
+          ><i class="fa-solid fa-gear"></i
+        ></a>
+      </div>
     </div>
 
     <audio id="alert-sound" src="" preload="auto"></audio>
 
     <div id="persistent-player-anchor"></div>
     <script type="module" src="scripts/app.js"></script>
-</body>
+  </body>
 </html>
