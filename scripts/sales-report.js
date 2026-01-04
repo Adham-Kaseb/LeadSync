@@ -772,11 +772,7 @@ function showEliteAnalyticsHub(data) {
     const todayEgp = parseVal(data.today?.totalEgp);
     const yestEgp = parseVal(data.yesterday?.totalEgp);
     const monthUsd = parseVal(data.currentMonth?.usdAmount);
-    const lastMonthUsd = parseVal(data.lastMonth?.usdAmount);
-    const yearUsd = parseVal(data.currentYear?.usdAmount);
-    const lastYearUsd = parseVal(data.lastYear?.usdAmount);
     const totalOrderMonth = parseVal(data.currentMonth?.orders);
-    const outsideUsd = parseVal(data.outsideCurrent?.usdAmount);
     const targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 10000;
 
     const metrics = [
@@ -784,14 +780,10 @@ function showEliteAnalyticsHub(data) {
         { title: "نمو المبيعات (أمس/اليوم)", icon: "fa-chart-line", calc: () => yestEgp === 0 ? "جديد" : (((todayEgp - yestEgp) / yestEgp) * 100).toFixed(1) + "%", desc: "نسبة التغير في المبيعات بين اليوم وأمس" },
         { title: "الزخم الشهري الحالي", icon: "fa-bolt", calc: () => (monthUsd / (targetAmount || 1) * 100).toFixed(1) + "%", desc: "مدى التقدم المحقق من الهدف الشهري الكلي" },
         { title: "توقع إغلاق الشهر", icon: "fa-wand-magic-sparkles", calc: () => "$" + (monthUsd / Math.max(1, day) * daysInMonth).toLocaleString(undefined, {maximumFractionDigits:0}), desc: "المبلغ المتوقع الوصول إليه بنهاية الشهر" },
-        { title: "نسبة المبيعات الخارجية", icon: "fa-globe", calc: () => ((outsideUsd / (monthUsd || 1)) * 100).toFixed(1) + "%", desc: "نسبة المبيعات من خارج التصنيف الأساسي" },
         { title: "مؤشر كفاءة التحويل", icon: "fa-bullseye", calc: () => (totalOrderMonth / (Math.max(1, monthUsd)/1000)).toFixed(1), desc: "عدد الطلبات لكل 1000 دولار محقق" },
-        { title: "قوة النمو السنوي", icon: "fa-arrow-up-right-dots", calc: () => lastYearUsd === 0 ? "جديد" : (((yearUsd - lastYearUsd) / lastYearUsd) * 100).toFixed(1) + "%", desc: "نسبة نمو السنة الحالية مقارنة بالماضية" },
-        { title: "الاستدامة الائتمانية", icon: "fa-shield-halved", calc: () => (monthUsd > (lastMonthUsd * 0.8) ? "مستقرة" : "تحدي"), desc: "مدى حفاظ المبيعات على مستوياتها التاريخية" },
         { title: "المعدل اليومي المطلوب", icon: "fa-person-running", calc: () => "$" + (Math.max(0, targetAmount - monthUsd) / Math.max(1, daysInMonth - day)).toLocaleString(undefined, {maximumFractionDigits:0}), desc: "المعدل اليومي المطلوب للوصول للهدف" },
         { title: "كثافة السوق الأسبوعية", icon: "fa-calendar-week", calc: () => (parseVal(data.currentWeek?.orders) / 7).toFixed(1) + " طلب", desc: "متوسط الطلبات اليومي المحقق هذا الأسبوع" },
         { title: "سرعة التدفق المالي", icon: "fa-gauge-high", calc: () => (todayEgp / 24).toLocaleString(undefined, {maximumFractionDigits:0}) + " EGP/س", desc: "متوسط الإيراد المحقق في كل ساعة عمل اليوم" },
-        { title: "الوزن النسبي للشهر", icon: "fa-ranking-star", calc: () => ((monthUsd / (yearUsd || 1)) * 100).toFixed(1) + "%", desc: "مساهمة الشهر الحالي من إجمالي السنة" }
     ];
 
     modal.innerHTML = `

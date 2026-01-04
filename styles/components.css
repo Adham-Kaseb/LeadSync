@@ -32,6 +32,10 @@
     cursor: grabbing;
 }
 
+.glass-card h3 i{
+    margin-left: 0.7rem;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -229,6 +233,23 @@
     border: 1px solid rgba(255,255,255,0.05);
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     width: fit-content;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 600px) {
+    .digital-clock {
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+    }
+    .clock-part {
+        font-size: 1.6rem;
+    }
+    .clock-colon {
+        font-size: 1.6rem;
+    }
+    .clock-ampm {
+        font-size: 0.8rem;
+    }
 }
 
 .clock-part {
@@ -389,9 +410,15 @@ input:checked + .slider::after {
 @media (max-width: 768px) {
     .modal-container {
         padding: 1.5rem;
-        margin: 10px;
-        max-width: 95%;
-        border-radius: 20px;
+        margin: 0;
+        width: 100%;
+        height: 100dvh; /* Dynamic viewport height */
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
     }
     .modal-title {
         font-size: 1.4rem;
@@ -516,6 +543,7 @@ input:checked + .slider::after {
     display: flex;
     gap: 10px;
     margin-top: 8px;
+    flex-wrap: wrap; /* Prevent overflow on very narrow screens */
 }
 
 .date-badge {
@@ -540,14 +568,30 @@ input:checked + .slider::after {
 @media (max-width: 992px) {
     .welcome-card {
         flex-direction: column;
-        gap: 2rem;
-        align-items: flex-start;
+        gap: 1.5rem;
+        align-items: center;
+        text-align: center;
         padding: 1.5rem;
+    }
+    
+    .user-profile {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .date-badge-container {
+        justify-content: center;
     }
     
     .header-clock-section {
         width: 100%;
         display: flex;
         justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-name {
+        font-size: 1.4rem;
     }
 }

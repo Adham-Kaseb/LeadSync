@@ -2,11 +2,17 @@ import { Storage, Utils } from './core.js';
 import { ShortcutsManager } from './shortcuts.js';
 import { showHealthPopup, getHealthContent, saveHealthContent } from './health.js';
 
-const createToggleHTML = (id, label) => `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
-        <span style="display: flex; align-items: center; gap: 12px; font-weight: 500; color: #fff;">
-            ${label}
-        </span>
+const createToggleHTML = (id, label, showReorder = false) => `
+    <div class="sidebar-manage-row" data-id="${id}" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            ${showReorder ? `
+                <div class="reorder-btns" style="display: flex; flex-direction: column; gap: 2px;">
+                    <button class="reorder-btn up" title="تحريك لأعلى" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; padding:2px; font-size:0.7rem;"><i class="fa-solid fa-chevron-up"></i></button>
+                    <button class="reorder-btn down" title="تحريك لأسفل" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; padding:2px; font-size:0.7rem;"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+            ` : ''}
+            <span style="font-weight: 500; color: #fff;">${label}</span>
+        </div>
         <label class="switch">
             <input type="checkbox" id="toggle-${id}">
             <span class="slider"></span>
@@ -33,6 +39,12 @@ export function renderSettings() {
         reminders: true,
         calendar: true,
         articles: true,
+        sales: true,
+        tvmode: true,
+        whatsapp: true,
+        meetings: true,
+        passwords: true,
+        sidebarOrder: ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'articles', 'sales', 'tvmode', 'whatsapp', 'passwords', 'meetings'],
         themeColor: '#FFD700',
         glassBlur: 20,
         borderRadius: 16,
@@ -64,16 +76,17 @@ export function renderSettings() {
         <h3 style="margin-bottom: 1rem;">إدارة القائمة الجانبية</h3>
         <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:1.5rem;">اختر الأقسام التي تود عرضها في القائمة الجانبية.</p>
         
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            ${createToggleHTML('leads', 'العملاء')}
-            ${createToggleHTML('almdrasa', 'المدرسة')}
-            ${createToggleHTML('messages', 'الرسائل')}
-            ${createToggleHTML('notes', 'الملاحظات')}
-            ${createToggleHTML('links', 'الروابط')}
-            ${createToggleHTML('calculator', 'الخصومات')}
-            ${createToggleHTML('reminders', 'التذكيرات')}
-            ${createToggleHTML('calendar', 'التقويم')}
-            ${createToggleHTML('articles', 'المقالات')}
+        <div id="sidebar-items-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            ${settings.sidebarOrder.map(id => {
+                const labels = {
+                    'leads': 'العملاء', 'almdrasa': 'المدرسة', 'messages': 'الرسائل',
+                    'notes': 'الملاحظات', 'links': 'الروابط', 'calculator': 'الخصومات',
+                    'reminders': 'التذكيرات', 'calendar': 'التقويم', 'articles': 'المقالات',
+                    'sales': 'المبيعات', 'tvmode': 'التلفاز', 'whatsapp': 'واتساب', 
+                    'meetings': 'الاجتماعات', 'passwords': 'كلمات المرور'
+                };
+                return createToggleHTML(id, labels[id] || id, true);
+            }).join('')}
         </div>
 
         <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
@@ -375,14 +388,20 @@ export function renderSettings() {
             'links': 'الروابط',
             'calculator': 'الخصومات',
             'reminders': 'التذكيرات',
-            'calendar': 'التقويم'
+            'calendar': 'التقويم',
+            'articles': 'المقالات',
+            'sales': 'المبيعات',
+            'tvmode': 'التلفاز',
+            'whatsapp': 'واتساب',
+            'meetings': 'الاجتماعات',
+            'passwords': 'كلمات المرور'
         };
         return names[mod] || mod;
     }
 
     if (ShortcutsManager.config.scheme === 'custom') renderCustomShortcuts();
 
-    const modules = ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'articles'];
+    const modules = ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'articles', 'sales', 'tvmode', 'whatsapp', 'meetings', 'passwords'];
     const modTargets = {
         'leads': 'leads',
         'almdrasa': 'almdrasa',
@@ -392,7 +411,42 @@ export function renderSettings() {
         'calculator': 'calculator',
         'reminders': 'reminders',
         'calendar': 'calendar',
-        'articles': 'articles'
+        'articles': 'articles',
+        'sales': 'sales',
+        'tvmode': 'tvmode',
+        'whatsapp': 'whatsapp',
+        'meetings': 'meetings',
+        'passwords': 'passwords'
+    };
+
+    const listContainer = modulesPanel.querySelector('#sidebar-items-list');
+    
+    const saveOrder = () => {
+        const rows = Array.from(listContainer.querySelectorAll('.sidebar-manage-row'));
+        settings.sidebarOrder = rows.map(r => r.dataset.id);
+        Storage.set('app_settings', settings);
+        // Dispatch event for real-time sidebar update if window.applySidebarOrder exists
+        if (typeof window.applySidebarOrder === 'function') window.applySidebarOrder();
+    };
+
+    listContainer.onclick = (e) => {
+        const btn = e.target.closest('.reorder-btn');
+        if (!btn) return;
+
+        const row = btn.closest('.sidebar-manage-row');
+        if (btn.classList.contains('up')) {
+            const prev = row.previousElementSibling;
+            if (prev) {
+                listContainer.insertBefore(row, prev);
+                saveOrder();
+            }
+        } else {
+            const next = row.nextElementSibling;
+            if (next) {
+                listContainer.insertBefore(next, row);
+                saveOrder();
+            }
+        }
     };
 
     modules.forEach(mod => {

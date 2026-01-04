@@ -139,7 +139,8 @@ function initApp() {
     const defaults = { 
         cursor: false, cursorStyle: 'default', lightning: false, trail: false, ripple: false, 
         magnetic: false, glow: false, fontSize: 100, parallax: false, clickEffect: 'none', 
-        themeColor: '#FFD700', glassBlur: 20, borderRadius: 16, animationSpeed: 'normal'
+        themeColor: '#FFD700', glassBlur: 20, borderRadius: 16, animationSpeed: 'normal',
+        sidebarOrder: ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'articles', 'sales', 'tvmode', 'whatsapp', 'passwords', 'meetings']
     };
     const loaded = JSON.parse(localStorage.getItem('app_settings')) || {};
     const settings = { ...defaults, ...loaded };
@@ -177,7 +178,7 @@ function initApp() {
     // Initialize Smoooooooth Global Scroller
     window.scroller = new SmoothScroller({ speed: 0.08, strength: 1.0 });
 
-    const modules = ['leads', 'almdrasa', 'sales', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles', 'meetings'];
+    const modules = ['leads', 'almdrasa', 'sales', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'tvmode', 'whatsapp', 'articles', 'meetings', 'passwords'];
     modules.forEach(mod => {
         const target = mod; 
         const navLink = document.querySelector(`a[data-target="${target}"]`);
@@ -206,6 +207,31 @@ function initMobileUI() {
     const sectionTitle = document.getElementById('mobile-section-title');
     const headerClock = document.getElementById('header-clock');
 
+    // Add close button to sidebar on mobile init if not already there
+    if (sidebar && !sidebar.querySelector('.mobile-sidebar-close')) {
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'mobile-sidebar-close';
+        closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        closeBtn.style.cssText = `
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            display: none; /* Only show on mobile via CSS */
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 3100;
+        `;
+        closeBtn.onclick = () => sidebar.classList.remove('active');
+        sidebar.appendChild(closeBtn);
+    }
+
     const toggleMenu = () => sidebar.classList.toggle('active');
 
     if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
@@ -225,15 +251,45 @@ function initMobileUI() {
     setInterval(updateClock, 1000);
     updateClock();
 
+    // Swipe Gestures for Sidebar
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    const handleSwipe = () => {
+        const diff = touchEndX - touchStartX;
+        const threshold = 100;
+        
+        // Swipe Right (Open) - from left edge
+        if (diff > threshold && touchStartX < 50) {
+            sidebar.classList.add('active');
+        }
+        // Swipe Left (Close)
+        else if (diff < -threshold && sidebar.classList.contains('active')) {
+            sidebar.classList.remove('active');
+        }
+    };
+
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash.slice(1) || 'dashboard';
         const activeNav = document.querySelector(`.nav-item[data-target="${hash}"]`);
         
         if (sectionTitle) {
             if (hash === 'dashboard') {
-                sectionTitle.textContent = sessionStorage.getItem('currentUser') || 'الـ HQ';
+                const greeting = sessionStorage.getItem('currentUser') || 'الـ HQ';
+                sectionTitle.textContent = greeting.includes(':') ? greeting.split(':')[1].trim() : greeting;
             } else if (activeNav) {
-                sectionTitle.textContent = activeNav.textContent.trim();
+                // Get only the text, exclude icon
+                const span = activeNav.querySelector('span');
+                sectionTitle.textContent = span ? span.textContent.trim() : activeNav.textContent.trim();
             }
         }
 
@@ -244,15 +300,58 @@ function initMobileUI() {
                 item.classList.remove('active');
             }
         });
+
+        // Close sidebar on navigation if open
+        sidebar.classList.remove('active');
     });
+
+    // Run once on init to set correct initial state
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
 
 window.addEventListener('hashchange', handleRoute);
+
+window.applySidebarOrder = () => {
+    const loaded = JSON.parse(localStorage.getItem('app_settings')) || {};
+    const sidebarOrder = loaded.sidebarOrder || ['leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'articles', 'sales', 'tvmode', 'whatsapp', 'passwords', 'meetings'];
+
+    const navLinks = document.querySelector('.nav-links');
+    if (!navLinks) return;
+
+    const items = Array.from(navLinks.children);
+    const orderMap = {};
+    sidebarOrder.forEach((id, idx) => orderMap[id] = idx);
+
+    items.sort((a, b) => {
+        const aAnchor = a.querySelector('a');
+        const bAnchor = b.querySelector('a');
+        
+        const aTarget = aAnchor?.dataset.target;
+        const bTarget = bAnchor?.dataset.target;
+        
+        // Dashboard always first
+        if (aTarget === 'dashboard') return -1;
+        if (bTarget === 'dashboard') return 1;
+        
+        // Settings dropdown always last
+        if (a.classList.contains('nav-dropdown-container')) return 1;
+        if (b.classList.contains('nav-dropdown-container')) return -1;
+
+        const aIdx = aTarget in orderMap ? orderMap[aTarget] : 999;
+        const bIdx = bTarget in orderMap ? orderMap[bTarget] : 999;
+        
+        return aIdx - bIdx;
+    });
+
+    items.forEach(item => navLinks.appendChild(item));
+};
+
 window.addEventListener('DOMContentLoaded', async () => {
     initApp(); 
     initMobileUI();
     ShortcutsManager.init();
     createLockScreen(); 
+    applySidebarOrder();
     
     try {
         const { checkReminders } = await import('./reminders.js');

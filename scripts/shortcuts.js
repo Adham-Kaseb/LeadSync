@@ -1,7 +1,7 @@
 import { Storage } from './core.js';
 
 export const ShortcutsManager = {
-    modules: ['dashboard', 'leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'articles'],
+    modules: ['dashboard', 'leads', 'almdrasa', 'messages', 'notes', 'links', 'calculator', 'reminders', 'calendar', 'articles', 'sales', 'tvmode', 'whatsapp', 'meetings', 'passwords'],
     
     config: {
         scheme: 'default', 
