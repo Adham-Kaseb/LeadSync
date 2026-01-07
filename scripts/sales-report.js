@@ -154,7 +154,7 @@ export async function renderSales() {
         const { day, daysInMonth, remainingDays, monthName, weekRange } = getDateContext();
 
         // Target Logic
-        let targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 10000;
+        let targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 20000;
         const currentUsdStr = data.currentMonth ? data.currentMonth.usdAmount : "$0";
         const currentUsdVal = parseFloat(currentUsdStr.replace(/[$,]/g, '')) || 0;
         
@@ -553,6 +553,12 @@ export async function renderSales() {
     };
 
     function init() {
+        // Migration: If target is set to the old default 10000, update it to 20000
+        const currentTarget = localStorage.getItem('sales_monthly_target');
+        if (currentTarget === '10000') {
+            localStorage.setItem('sales_monthly_target', '20000');
+        }
+
         // Only seed demo data if the user has NEVER used the sales report before
         // This prevents old demo data from coming back after a user clears it or enters their own.
         const currentData = Storage.get('last_sales_data');
@@ -773,7 +779,7 @@ function showEliteAnalyticsHub(data) {
     const yestEgp = parseVal(data.yesterday?.totalEgp);
     const monthUsd = parseVal(data.currentMonth?.usdAmount);
     const totalOrderMonth = parseVal(data.currentMonth?.orders);
-    const targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 10000;
+    const targetAmount = parseFloat(localStorage.getItem('sales_monthly_target')) || 20000;
 
     const metrics = [
         { title: "متوسط الطلبية اليوم", icon: "fa-calculator", calc: () => (todayEgp / (parseVal(data.today?.orders) || 1)).toLocaleString(undefined, {maximumFractionDigits:0}) + " EGP", desc: "القيمة المتوسطة لكل طلب تم اليوم" },
