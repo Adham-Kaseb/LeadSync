@@ -249,11 +249,12 @@
     -webkit-appearance: none;
     width: 100px;
     height: 6px;
-    background: linear-gradient(to left, var(--metallic-gold) var(--volume-percent, 50%), rgba(255, 255, 255, 0.1) var(--volume-percent, 50%));
+    background: linear-gradient(to right, var(--metallic-gold) var(--volume-percent, 50%), rgba(255, 255, 255, 0.1) var(--volume-percent, 50%));
     border-radius: 10px;
     outline: none;
     cursor: pointer;
     transition: background 0.1s ease;
+    direction: ltr;
 }
 
 .volume-slider::-webkit-slider-thumb {

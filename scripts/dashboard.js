@@ -384,7 +384,7 @@ export async function renderDashboard() {
       const savedActions=JSON.parse(localStorage.getItem("quick_actions") || '["leads", "notes", "calculator", "calendar", "settings"]'
       );
 
-      actionCard.innerHTML=` <div class="card-hint-overlay"><div class="hint-text"><i class="fa-solid fa-keyboard"></i>R للتبديل </div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;"><div style="display: flex; align-items: center; gap: 10px;"><h3 style="margin:0;"><i class="fa-solid fa-bolt gold-text"></i>إجراءات سريعة</h3></div><button class="radio-mini-btn edit-actions-btn" title="تعديل الإجراءات" style="width:30px; height:30px; margin:0!important; background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2);"><i class="fa-solid fa-pen-to-square" style="font-size:0.8rem; color:var(--metallic-gold);"></i></button></div><div class="quick-actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; animation: fadeIn 0.3s ease;">${
+      actionCard.innerHTML=` <div class="card-hint-overlay"><div class="hint-text">اضغط<span style="color: #fff; padding: 0 5px;">R</span>للتبديل</div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;"><div style="display: flex; align-items: center; gap: 10px;"><h3 style="margin:0;"><i class="fa-solid fa-bolt gold-text"></i>إجراءات سريعة</h3></div><button class="radio-mini-btn edit-actions-btn" title="تعديل الإجراءات" style="width:30px; height:30px; margin:0!important; background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2);"><i class="fa-solid fa-pen-to-square" style="font-size:0.8rem; color:var(--metallic-gold);"></i></button></div><div class="quick-actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; animation: fadeIn 0.3s ease;">${
         showingExternal ? externalLinks .map((link)=> ` <a href="${link.url}" target="_blank" class="btn btn-glass" style="text-decoration: none;"> <i class="fa-solid ${link.icon}"></i> ${
             link.label
           }
@@ -679,13 +679,7 @@ setTimeout(async ()=> {
       Array(24) .fill(0) .map(()=> ` <div class="wave-bar-container" style="position:relative; height:100%; width:10px; display:flex; align-items:flex-end;"> <div class="wave-bar"></div> <div class="peak-cap"></div> </div> `) .join("")
     }
 
-    </div> </div> <div class="radio-controls-row"> <div class="volume-control"> <button class="radio-mini-btn mute-btn" title="كتم الصوت"><i class="fa-solid fa-volume-high"></i></button> <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${
-radio.volume
-  }
-
-  " style="--volume-percent: ${
-    radio.volume * 100
-  }%">
+    </div> </div> <div class="radio-controls-row"> <div class="volume-control"> <button class="radio-mini-btn mute-btn" title="كتم الصوت"><i class="fa-solid fa-volume-high"></i></button> <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${radio.volume}" style="--volume-percent: ${radio.volume * 100}%">
 </div> <div class="main-btns"> <button class="radio-btn prev-btn" title="القارئ السابق"><i class="fa-solid fa-backward-step"></i></button> <button class="radio-btn play-btn" id="radio-play-toggle"> <i class="fa-solid fa-play"></i> </button> <button class="radio-btn next-btn" title="القارئ التالي"><i class="fa-solid fa-forward-step"></i></button> </div> <div class="radio-actions"> <button class="radio-mini-btn mirror-btn" id="switch-mirror" title="تبديل السيرفر" style="display: none;"><i class="fa-solid fa-server"></i></button> <button class="radio-mini-btn refresh-btn" id="refresh-stream" title="تحديث البث"><i class="fa-solid fa-arrows-rotate"></i></button> <button class="radio-mini-btn" id="copy-stream" title="نسخ رابط البث"><i class="fa-solid fa-link"></i></button> <button class="radio-mini-btn" id="search-reciter" title="بحث عن قارئ"><i class="fa-solid fa-magnifying-glass"></i></button> </div> </div> `;
 
   radioPlaceholder.appendChild(radioContainer);
