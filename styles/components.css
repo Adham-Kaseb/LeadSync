@@ -595,3 +595,62 @@ input:checked + .slider::after {
         font-size: 1.4rem;
     }
 }
+
+/* Prayer Timer Styles */
+.prayer-timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 0.8rem 1.4rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    min-width: 160px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+}
+
+.prayer-timer-container:hover {
+    border-color: rgba(255, 215, 0, 0.15);
+    background: rgba(255, 215, 0, 0.03);
+}
+
+.prayer-label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.prayer-info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.prayer-name {
+    font-size: 1rem;
+    color: var(--metallic-gold);
+    font-weight: 800;
+}
+
+.prayer-countdown {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.1);
+    margin: 2px 0;
+}
+
+.prayer-time-badge {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}

@@ -93,7 +93,9 @@ export async function renderDashboard() {
       gregorianDate
     }
 
-    </span></div></div></div></div><div class="header-clock-section"><div id="clock-display" class="digital-clock" style="direction: ltr;"><span class="clock-part" id="clock-h">12</span><span class="clock-colon">:</span><span class="clock-part" id="clock-m">00</span><div class="clock-ampm" id="clock-p" style="margin-left: 10px;">PM</div></div></div></div>`;
+    </span></div><div id="prayer-timer-badge" class="date-badge prayer-badge" style="display: none;"><i class="fa-solid fa-mosque"></i><span class="prayer-name">--</span><span class="prayer-time-badge" style="opacity: 0.6; margin: 0 5px;">--:--</span><span class="prayer-countdown" style="font-family: 'Orbitron', sans-serif; color: var(--metallic-gold); font-weight: 700;">00:00:00</span></div></div></div></div>
+    
+    <div class="header-clock-section"><div id="clock-display" class="digital-clock" style="direction: ltr;"><span class="clock-part" id="clock-h">12</span><span class="clock-colon">:</span><span class="clock-part" id="clock-m">00</span><div class="clock-ampm" id="clock-p" style="margin-left: 10px;">PM</div></div></div></div>`;
 
     const updateTime=()=> {
       if ( !header.isConnected) return;
@@ -158,6 +160,96 @@ export async function renderDashboard() {
     catch (e) {
       console.error("Clock init error", e);
     }
+
+    // Prayer Timer Logic
+    const initPrayerTimer = async () => {
+        const prayerBadge = header.querySelector("#prayer-timer-badge");
+        if (!prayerBadge) return;
+        
+        const prayerNameEl = prayerBadge.querySelector(".prayer-name");
+        const prayerTimeEl = prayerBadge.querySelector(".prayer-time-badge");
+        const countdownEl = prayerBadge.querySelector(".prayer-countdown");
+
+        const PRAYER_NAMES_AR = {
+            Fajr: 'الفجر',
+            Dhuhr: 'الظهر',
+            Asr: 'العصر',
+            Maghrib: 'المغرب',
+            Isha: 'العشاء'
+        };
+
+        const fetchPrayerTimes = async () => {
+            try {
+                // Using Aladhan API with Cairo, Egypt as default for testing
+                // In a future update, this can be made configurable in settings
+                const city = "Cairo";
+                const country = "Egypt";
+                const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=4`);
+                const data = await response.json();
+                if (data.code === 200) {
+                    return data.data.timings;
+                }
+            } catch (error) {
+                console.error("Prayer fetch error:", error);
+            }
+            return null;
+        };
+
+        let timings = await fetchPrayerTimes();
+        if (!timings) return;
+
+        prayerBadge.style.display = "flex";
+
+        const updateCountdown = () => {
+            const now = new Date();
+            const prayerSequence = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+            
+            let nextPrayer = null;
+            let nextPrayerTime = null;
+
+            for (const prayer of prayerSequence) {
+                const [hours, minutes] = timings[prayer].split(':');
+                const pTime = new Date(now);
+                pTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+                if (pTime > now) {
+                    nextPrayer = prayer;
+                    nextPrayerTime = pTime;
+                    break;
+                }
+            }
+
+            // If no prayer left today, next is Fajr of tomorrow
+            if (!nextPrayer) {
+                nextPrayer = 'Fajr';
+                const [hours, minutes] = timings.Fajr.split(':');
+                nextPrayerTime = new Date(now);
+                nextPrayerTime.setDate(now.getDate() + 1);
+                nextPrayerTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+            }
+
+            const diff = nextPrayerTime - now;
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            prayerNameEl.innerText = PRAYER_NAMES_AR[nextPrayer];
+            prayerTimeEl.innerText = timings[nextPrayer];
+            countdownEl.innerText = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        };
+
+        const prayerInterval = setInterval(() => {
+            if (!header.isConnected) {
+                clearInterval(prayerInterval);
+                return;
+            }
+            updateCountdown();
+        }, 1000);
+
+        updateCountdown();
+    };
+
+    initPrayerTimer();
 
     const avatar=header.querySelector("#main-user-avatar");
     const avatarInput=header.querySelector("#avatar-input");
