@@ -340,12 +340,35 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
-.font-option.active {
+.font-option.active, .tafsir-btn.active {
     background: var(--metallic-gold);
     color: #000;
     font-weight: 700;
     border-color: var(--metallic-gold);
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+}
+
+.tafsir-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: auto;
+}
+.tafsir-btn i {
+    font-size: 0.9rem;
+    color: var(--metallic-gold);
+}
+
+.tafsir-btn.active i {
+    color: #000;
 }
 
 .back-to-list {
@@ -390,6 +413,45 @@
     color: rgba(255, 255, 255, 0.95);
     font-family: 'Amiri', serif;
     padding: 1rem;
+}
+
+.verses-container.tafsir-mode {
+    font-family: 'Cairo', sans-serif !important;
+    font-size: 1.25rem;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.tafsir-item {
+    display: block;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-right: 3px solid var(--metallic-gold);
+    border-radius: 4px 12px 12px 4px;
+}
+
+.tafsir-number {
+    display: block;
+    color: var(--metallic-gold);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.tafsir-footer {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 217, 0, 0.529);
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.622);
+    font-family: 'Cairo', sans-serif;
+}
+
+.tafsir-footer i {
+    color: var(--metallic-gold);
+    margin-left: 5px;
 }
 
 .verse {

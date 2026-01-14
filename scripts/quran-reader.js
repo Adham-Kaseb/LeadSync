@@ -8,6 +8,9 @@ export class QuranReader {
     this.modal = null;
     this.overlay = null;
     this.currentFont = localStorage.getItem("quran_reading_font") || "Amiri";
+    this.readingMode = "verses"; // 'verses' or 'tafsir'
+    this.currentSurahData = null;
+    this.currentTafsirData = null;
   }
 
   async init() {
@@ -357,8 +360,10 @@ export class QuranReader {
       const data = await response.json();
 
       if (data.code === 200) {
-        const surah = data.data;
-        this.renderReadingView(surah);
+        this.currentSurahData = data.data;
+        this.currentTafsirData = null; // Reset cached tafsir
+        this.readingMode = "verses"; // Reset to verses mode
+        this.renderReadingView(this.currentSurahData);
       } else {
         throw new Error("Failed to fetch surah content");
       }
@@ -371,12 +376,53 @@ export class QuranReader {
     }
   }
 
+  async toggleReadingMode() {
+    if (this.readingMode === "verses") {
+      if (!this.currentTafsirData) {
+        // Load Tafsir
+        const tafsirBtn = this.overlay.querySelector(".tafsir-btn");
+        if (tafsirBtn)
+          tafsirBtn.innerHTML =
+            '<div class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></div> جاري التحميل...';
+
+        try {
+          const response = await fetch(
+            `https://api.alquran.cloud/v1/surah/${this.currentSurahData.number}/ar.muyassar`
+          );
+          const data = await response.json();
+          if (data.code === 200) {
+            this.currentTafsirData = data.data;
+            this.readingMode = "tafsir";
+            this.renderReadingView(this.currentSurahData);
+          } else {
+            throw new Error("Tafsir load failed");
+          }
+        } catch (error) {
+          console.error("Tafsir Error:", error);
+          Notifications.error("فشل تحميل التفسير");
+          if (tafsirBtn)
+            tafsirBtn.innerHTML =
+              '<i class="fa-solid fa-book-open-reader"></i> تفسير الآيات';
+          return;
+        }
+      } else {
+        this.readingMode = "tafsir";
+        this.renderReadingView(this.currentSurahData);
+      }
+    } else {
+      this.readingMode = "verses";
+      this.renderReadingView(this.currentSurahData);
+    }
+  }
+
   setFont(fontName) {
     this.currentFont = fontName;
     localStorage.setItem("quran_reading_font", fontName);
     const versesContainer = this.overlay.querySelector(".verses-container");
     if (versesContainer) {
-      versesContainer.style.fontFamily = `'${fontName}', serif`;
+      if (this.readingMode === "verses") {
+        versesContainer.style.fontFamily = `'${fontName}', serif`;
+      }
     }
 
     // Update active class in UI
@@ -397,6 +443,8 @@ export class QuranReader {
       backMethod = "renderManzilList()";
     }
 
+    const isTafsir = this.readingMode === "tafsir";
+
     this.modalContent.innerHTML = `
             <div class="reading-view">
                 <button class="back-to-list" onclick="window.quranReader.${backMethod}">
@@ -414,52 +462,84 @@ export class QuranReader {
     } آية • الجزء ${this.toArabicDigits(this.getSurahStartJuz(surah.number))}
                     </p>
 
-                    <div class="font-settings">
-                        <span class="font-label"><i class="fa-solid fa-font"></i> اختر الخط:</span>
-                        <div class="font-options">
-                            <button class="font-option ${
-                              this.currentFont === "Amiri" ? "active" : ""
-                            }" data-font="Amiri" onclick="window.quranReader.setFont('Amiri')">الأميري</button>
-                            <button class="font-option ${
-                              this.currentFont === "Scheherazade New"
-                                ? "active"
-                                : ""
-                            }" data-font="Scheherazade New" onclick="window.quranReader.setFont('Scheherazade New')">شهرزاد</button>
-                            <button class="font-option ${
-                              this.currentFont === "Noto Naskh Arabic"
-                                ? "active"
-                                : ""
-                            }" data-font="Noto Naskh Arabic" onclick="window.quranReader.setFont('Noto Naskh Arabic')">النسخ</button>
+                    <div class="font-settings" style="flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="font-label"> اختر الخط:</span>
+                            <div class="font-options">
+                                <button class="font-option ${
+                                  this.currentFont === "Amiri" ? "active" : ""
+                                }" data-font="Amiri" onclick="window.quranReader.setFont('Amiri')">الأميري</button>
+                                <button class="font-option ${
+                                  this.currentFont === "Scheherazade New"
+                                    ? "active"
+                                    : ""
+                                }" data-font="Scheherazade New" onclick="window.quranReader.setFont('Scheherazade New')">شهرزاد</button>
+                                <button class="font-option ${
+                                  this.currentFont === "Noto Naskh Arabic"
+                                    ? "active"
+                                    : ""
+                                }" data-font="Noto Naskh Arabic" onclick="window.quranReader.setFont('Noto Naskh Arabic')">النسخ</button>
+                            </div>
                         </div>
+                        
+                        <button class="tafsir-btn ${
+                          isTafsir ? "active" : ""
+                        }" onclick="window.quranReader.toggleReadingMode()">
+                            <i class="fa-solid fa-book-open-reader"></i>
+                            ${isTafsir ? "عرض الآيات الأصلية" : "تفسير الآيات"}
+                        </button>
                     </div>
                 </div>
 
                 ${
-                  surah.number !== 1 && surah.number !== 9
+                  !isTafsir && surah.number !== 1 && surah.number !== 9
                     ? `
                     <div class="bismillah" style="font-family: '${this.currentFont}', serif;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
                 `
                     : ""
                 }
 
-                <div class="verses-container" style="font-family: '${
-                  this.currentFont
-                }', serif;">
-                    ${surah.ayahs
-                      .map(
-                        (ayah) => `
-                        <span class="verse">
-                            ${ayah.text.replace(
-                              "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّhِيمِ",
-                              ""
-                            )}
-                            <span class="verse-number">${this.toArabicDigits(
-                              ayah.numberInSurah
-                            )}</span>
-                        </span>
-                    `
-                      )
-                      .join(" ")}
+                <div class="verses-container ${
+                  isTafsir ? "tafsir-mode" : ""
+                }" style="font-family: '${
+      isTafsir ? "Cairo" : this.currentFont
+    }', ${isTafsir ? "sans-serif" : "serif"};">
+                    ${
+                      isTafsir
+                        ? this.currentTafsirData.ayahs
+                            .map(
+                              (ayah) => `
+                            <div class="tafsir-item">
+                                <span class="tafsir-number">الآية ${this.toArabicDigits(
+                                  ayah.numberInSurah
+                                )}</span>
+                                ${ayah.text}
+                            </div>
+                        `
+                            )
+                            .join("") +
+                          `
+                            <div class="tafsir-footer">
+                                <i class="fa-solid fa-circle-info"></i>
+                                المصدر: التفسير الميسر - مجمع الملك فهد لطباعة المصحف الشريف (عبر Al-Quran Cloud API)
+                            </div>
+                        `
+                        : surah.ayahs
+                            .map(
+                              (ayah) => `
+                            <span class="verse">
+                                ${ayah.text.replace(
+                                  "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّhِيمِ",
+                                  ""
+                                )}
+                                <span class="verse-number">${this.toArabicDigits(
+                                  ayah.numberInSurah
+                                )}</span>
+                            </span>
+                        `
+                            )
+                            .join(" ")
+                    }
                 </div>
             </div>
         `;
