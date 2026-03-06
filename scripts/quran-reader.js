@@ -1,0 +1,571 @@
+import { Notifications } from "./core.js";
+
+export class QuranReader {
+  constructor() {
+    this.surahs = [];
+    this.juzStarts = [];
+    this.viewMode = "surah"; // 'surah', 'juz', or 'manzil'
+    this.modal = null;
+    this.overlay = null;
+    this.currentFont = localStorage.getItem("quran_reading_font") || "Amiri";
+    this.readingMode = "verses"; // 'verses' or 'tafsir'
+    this.currentSurahData = null;
+    this.currentTafsirData = null;
+  }
+
+  async init() {
+    if (!this.overlay) {
+      this.createModal();
+    }
+
+    if (this.surahs.length === 0) {
+      await this.loadSurahs();
+      await this.loadMeta();
+    }
+
+    if (this.viewMode === "surah") {
+      this.renderSurahList();
+    } else if (this.viewMode === "juz") {
+      this.renderJuzList();
+    } else {
+      this.renderManzilList();
+    }
+  }
+
+  createModal() {
+    this.overlay = document.createElement("div");
+    this.overlay.className = "quran-modal-overlay";
+
+    this.overlay.innerHTML = `
+            <div class="quran-modal">
+                <div class="quran-modal-header">
+                    <div class="quran-header-title">
+                        <i class="fa-solid fa-book-quran"></i>
+                        <h2 id="quran-title-text">القرآن الكريم</h2>
+                    </div>
+                    <div class="quran-view-toggle">
+                        <button class="toggle-btn active" id="toggle-surah" onclick="window.quranReader.setViewMode('surah')">السور</button>
+                        <button class="toggle-btn" id="toggle-juz" onclick="window.quranReader.setViewMode('juz')">الأجزاء</button>
+                        <button class="toggle-btn" id="toggle-manzil" onclick="window.quranReader.setViewMode('manzil')">الأحزاب</button>
+                    </div>
+                    <button class="quran-close-btn" id="quran-close-btn">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="quran-modal-content" id="quran-modal-content">
+                    <div class="loading-state" style="text-align: center; padding: 3rem;">
+                        <div class="spinner spinner-lg"></div>
+                        <p style="margin-top: 1rem; color: var(--text-secondary);">جاري تحميل السور...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+    document.body.appendChild(this.overlay);
+
+    this.overlay.querySelector("#quran-close-btn").onclick = () => this.hide();
+    this.overlay.onclick = (e) => {
+      if (e.target === this.overlay) this.hide();
+    };
+
+    this.modalContent = this.overlay.querySelector("#quran-modal-content");
+
+    // Add click-away listener
+    this.modalContent.onclick = (e) => {
+      // If we click on the modal content background or the grid (not a card)
+      if (
+        e.target === this.modalContent ||
+        e.target.classList.contains("surah-grid")
+      ) {
+        this.closeAllDropdowns();
+      }
+    };
+  }
+
+  closeAllDropdowns() {
+    this.overlay
+      .querySelectorAll(".juz-dropdown.active")
+      .forEach((el) => el.classList.remove("active"));
+    this.overlay
+      .querySelectorAll(".juz-card.expanded")
+      .forEach((el) => el.classList.remove("expanded"));
+  }
+
+  async loadSurahs() {
+    try {
+      const response = await fetch("https://api.alquran.cloud/v1/surah");
+      const data = await response.json();
+
+      if (data.code === 200) {
+        this.surahs = data.data;
+      } else {
+        throw new Error("Failed to fetch surahs");
+      }
+    } catch (error) {
+      console.error("Quran Reader Error:", error);
+      Notifications.error("فشل تحميل قائمة السور");
+      this.modalContent.innerHTML = `<p style="color: var(--color-error); text-align: center;">خطأ في تحميل البيانات. يرجى المحاولة مرة أخرى.</p>`;
+    }
+  }
+
+  async loadMeta() {
+    try {
+      const response = await fetch("https://api.alquran.cloud/v1/meta");
+      const data = await response.json();
+      if (data.code === 200) {
+        this.juzStarts = data.data.juzs.references;
+      }
+    } catch (error) {
+      console.error("Quran Meta Error:", error);
+    }
+  }
+
+  getSurahStartJuz(surahNumber) {
+    if (!this.juzStarts || !this.juzStarts.length) return 1;
+    let j = 1;
+    for (let i = 0; i < this.juzStarts.length; i++) {
+      if (this.juzStarts[i].surah <= surahNumber) {
+        j = i + 1;
+      } else {
+        break;
+      }
+    }
+    return j;
+  }
+
+  renderSurahList() {
+    this.viewMode = "surah";
+    this.updateToggleState();
+    this.modalContent.innerHTML = `
+            <div class="surah-grid">
+                ${this.surahs
+                  .map(
+                    (surah) => `
+                    <div class="surah-card" onclick="window.quranReader.showSurah(${
+                      surah.number
+                    })">
+                        <div class="surah-number">${surah.number}</div>
+                        <div class="surah-info">
+                            <div class="surah-name-ar">${surah.name}</div>
+                            <div class="surah-meta">
+                                <span><i class="fa-solid fa-list-ol" style="font-size: 0.7rem; margin-left: 5px;"></i>${
+                                  surah.numberOfAyahs
+                                } آية</span> • 
+                                <span><i class="fa-solid fa-book-open" style="font-size: 0.7rem; margin-left: 5px;"></i>الجزء ${this.toArabicDigits(
+                                  this.getSurahStartJuz(surah.number)
+                                )}</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+                  )
+                  .join("")}
+            </div>
+        `;
+  }
+
+  setViewMode(mode) {
+    if (this.viewMode === mode) return;
+    this.viewMode = mode;
+    this.updateToggleState();
+    if (mode === "surah") {
+      this.renderSurahList();
+    } else if (mode === "juz") {
+      this.renderJuzList();
+    } else {
+      this.renderManzilList();
+    }
+  }
+
+  updateToggleState() {
+    const surahBtn = this.overlay.querySelector("#toggle-surah");
+    const juzBtn = this.overlay.querySelector("#toggle-juz");
+    const manzilBtn = this.overlay.querySelector("#toggle-manzil");
+    if (surahBtn && juzBtn && manzilBtn) {
+      surahBtn.classList.toggle("active", this.viewMode === "surah");
+      juzBtn.classList.toggle("active", this.viewMode === "juz");
+      manzilBtn.classList.toggle("active", this.viewMode === "manzil");
+    }
+  }
+
+  renderJuzList() {
+    this.modalContent.innerHTML = `
+            <div class="surah-grid">
+                ${Array.from({ length: 30 }, (_, i) => i + 1)
+                  .map(
+                    (number) => `
+                    <div class="juz-container">
+                        <div class="surah-card juz-card" id="juz-card-${number}" onclick="window.quranReader.toggleJuz(${number})">
+                            <div class="surah-number">${number}</div>
+                            <div class="surah-info">
+                                <div class="surah-name-ar">الجزء ${this.toArabicDigits(
+                                  number
+                                )}</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down juz-arrow"></i>
+                        </div>
+                        <div class="juz-dropdown" id="juz-dropdown-${number}"></div>
+                    </div>
+                `
+                  )
+                  .join("")}
+            </div>
+        `;
+  }
+
+  async toggleJuz(number) {
+    const dropdown = this.overlay.querySelector(`#juz-dropdown-${number}`);
+    const card = this.overlay.querySelector(`#juz-card-${number}`);
+
+    if (dropdown.classList.contains("active")) {
+      dropdown.classList.remove("active");
+      card.classList.remove("expanded");
+      return;
+    }
+
+    this.closeAllDropdowns();
+    dropdown.classList.add("active");
+    card.classList.add("expanded");
+
+    if (dropdown.innerHTML === "") {
+      dropdown.innerHTML = `<div style="padding: 1.5rem; text-align: center;"><div class="spinner"></div></div>`;
+      try {
+        const response = await fetch(
+          `https://api.alquran.cloud/v1/juz/${number}`
+        );
+        const data = await response.json();
+
+        if (data.code === 200) {
+          const surahsInJuz = [];
+          const seenSurahs = new Set();
+
+          data.data.ayahs.forEach((ayah) => {
+            if (!seenSurahs.has(ayah.surah.number)) {
+              seenSurahs.add(ayah.surah.number);
+              surahsInJuz.push(ayah.surah);
+            }
+          });
+
+          dropdown.innerHTML = `
+                        <div class="juz-surah-list">
+                            ${surahsInJuz
+                              .map(
+                                (surah) => `
+                                <div class="juz-surah-item" onclick="event.stopPropagation(); window.quranReader.showSurah(${surah.number})">
+                                    <span>${surah.name}</span>
+                                </div>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    `;
+        }
+      } catch (error) {
+        dropdown.innerHTML = `<div style="padding: 1rem; color: var(--color-error);">فشل تحميل بيانات الجزء</div>`;
+      }
+    }
+  }
+
+  renderManzilList() {
+    this.modalContent.innerHTML = `
+            <div class="surah-grid">
+                ${Array.from({ length: 7 }, (_, i) => i + 1)
+                  .map(
+                    (number) => `
+                    <div class="juz-container">
+                        <div class="surah-card juz-card" id="manzil-card-${number}" onclick="window.quranReader.toggleManzil(${number})">
+                            <div class="surah-number">${number}</div>
+                            <div class="surah-info">
+                                <div class="surah-name-ar">الحزب ${this.toArabicDigits(
+                                  number
+                                )}</div>
+                                <div class="surah-meta">التقسيم الأسبوعي للقرآن</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down juz-arrow"></i>
+                        </div>
+                        <div class="juz-dropdown" id="manzil-dropdown-${number}"></div>
+                    </div>
+                `
+                  )
+                  .join("")}
+            </div>
+        `;
+  }
+
+  async toggleManzil(number) {
+    const dropdown = this.overlay.querySelector(`#manzil-dropdown-${number}`);
+    const card = this.overlay.querySelector(`#manzil-card-${number}`);
+
+    if (dropdown.classList.contains("active")) {
+      dropdown.classList.remove("active");
+      card.classList.remove("expanded");
+      return;
+    }
+
+    this.closeAllDropdowns();
+    dropdown.classList.add("active");
+    card.classList.add("expanded");
+
+    if (dropdown.innerHTML === "") {
+      dropdown.innerHTML = `<div style="padding: 1.5rem; text-align: center;"><div class="spinner"></div></div>`;
+      try {
+        const response = await fetch(
+          `https://api.alquran.cloud/v1/manzil/${number}`
+        );
+        const data = await response.json();
+
+        if (data.code === 200) {
+          const surahsInManzil = [];
+          const seenSurahs = new Set();
+
+          data.data.ayahs.forEach((ayah) => {
+            if (!seenSurahs.has(ayah.surah.number)) {
+              seenSurahs.add(ayah.surah.number);
+              surahsInManzil.push(ayah.surah);
+            }
+          });
+
+          dropdown.innerHTML = `
+                        <div class="juz-surah-list">
+                            ${surahsInManzil
+                              .map(
+                                (surah) => `
+                                <div class="juz-surah-item" onclick="event.stopPropagation(); window.quranReader.showSurah(${surah.number})">
+                                    <span>${surah.name}</span>
+                                </div>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    `;
+        }
+      } catch (error) {
+        dropdown.innerHTML = `<div style="padding: 1rem; color: var(--color-error);">فشل تحميل بيانات الحزب</div>`;
+      }
+    }
+  }
+
+  async showSurah(number) {
+    this.modalContent.innerHTML = `
+            <div class="loading-state" style="text-align: center; padding: 3rem;">
+                <div class="spinner spinner-lg"></div>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">جاري تحميل السورة...</p>
+            </div>
+        `;
+
+    try {
+      const response = await fetch(
+        `https://api.alquran.cloud/v1/surah/${number}`
+      );
+      const data = await response.json();
+
+      if (data.code === 200) {
+        this.currentSurahData = data.data;
+        this.currentTafsirData = null; // Reset cached tafsir
+        this.readingMode = "verses"; // Reset to verses mode
+        this.renderReadingView(this.currentSurahData);
+      } else {
+        throw new Error("Failed to fetch surah content");
+      }
+    } catch (error) {
+      console.error("Quran Reader Error:", error);
+      Notifications.error("فشل تحميل السورة");
+      if (this.viewMode === "surah") this.renderSurahList();
+      else if (this.viewMode === "juz") this.renderJuzList();
+      else this.renderManzilList();
+    }
+  }
+
+  async toggleReadingMode() {
+    if (this.readingMode === "verses") {
+      if (!this.currentTafsirData) {
+        // Load Tafsir
+        const tafsirBtn = this.overlay.querySelector(".tafsir-btn");
+        if (tafsirBtn)
+          tafsirBtn.innerHTML =
+            '<div class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></div> جاري التحميل...';
+
+        try {
+          const response = await fetch(
+            `https://api.alquran.cloud/v1/surah/${this.currentSurahData.number}/ar.muyassar`
+          );
+          const data = await response.json();
+          if (data.code === 200) {
+            this.currentTafsirData = data.data;
+            this.readingMode = "tafsir";
+            this.renderReadingView(this.currentSurahData);
+          } else {
+            throw new Error("Tafsir load failed");
+          }
+        } catch (error) {
+          console.error("Tafsir Error:", error);
+          Notifications.error("فشل تحميل التفسير");
+          if (tafsirBtn)
+            tafsirBtn.innerHTML =
+              '<i class="fa-solid fa-book-open-reader"></i> تفسير الآيات';
+          return;
+        }
+      } else {
+        this.readingMode = "tafsir";
+        this.renderReadingView(this.currentSurahData);
+      }
+    } else {
+      this.readingMode = "verses";
+      this.renderReadingView(this.currentSurahData);
+    }
+  }
+
+  setFont(fontName) {
+    this.currentFont = fontName;
+    localStorage.setItem("quran_reading_font", fontName);
+    const versesContainer = this.overlay.querySelector(".verses-container");
+    if (versesContainer) {
+      if (this.readingMode === "verses") {
+        versesContainer.style.fontFamily = `'${fontName}', serif`;
+      }
+    }
+
+    // Update active class in UI
+    this.overlay.querySelectorAll(".font-option").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.font === fontName);
+    });
+  }
+
+  renderReadingView(surah) {
+    let backLabel = "قائمة السور";
+    let backMethod = "renderSurahList()";
+
+    if (this.viewMode === "juz") {
+      backLabel = "قائمة الأجزاء";
+      backMethod = "renderJuzList()";
+    } else if (this.viewMode === "manzil") {
+      backLabel = "قائمة الأحزاب";
+      backMethod = "renderManzilList()";
+    }
+
+    const isTafsir = this.readingMode === "tafsir";
+
+    this.modalContent.innerHTML = `
+            <div class="reading-view">
+                <button class="back-to-list" onclick="window.quranReader.${backMethod}">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    العودة ل${backLabel}
+                </button>
+
+                <div class="reading-header">
+                    <h1 class="surah-title-large">${surah.name}</h1>
+                    <p class="surah-meta" style="font-size: 1rem;">
+                        ${
+                          surah.revelationType === "Meccan" ? "مكية" : "مدنية"
+                        } • ${
+      surah.numberOfAyahs
+    } آية • الجزء ${this.toArabicDigits(this.getSurahStartJuz(surah.number))}
+                    </p>
+
+                    <div class="font-settings" style="flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="font-label"> اختر الخط:</span>
+                            <div class="font-options">
+                                <button class="font-option ${
+                                  this.currentFont === "Amiri" ? "active" : ""
+                                }" data-font="Amiri" onclick="window.quranReader.setFont('Amiri')">الأميري</button>
+                                <button class="font-option ${
+                                  this.currentFont === "Scheherazade New"
+                                    ? "active"
+                                    : ""
+                                }" data-font="Scheherazade New" onclick="window.quranReader.setFont('Scheherazade New')">شهرزاد</button>
+                                <button class="font-option ${
+                                  this.currentFont === "Noto Naskh Arabic"
+                                    ? "active"
+                                    : ""
+                                }" data-font="Noto Naskh Arabic" onclick="window.quranReader.setFont('Noto Naskh Arabic')">النسخ</button>
+                            </div>
+                        </div>
+                        
+                        <button class="tafsir-btn ${
+                          isTafsir ? "active" : ""
+                        }" onclick="window.quranReader.toggleReadingMode()">
+                            <i class="fa-solid fa-book-open-reader"></i>
+                            ${isTafsir ? "عرض الآيات الأصلية" : "تفسير الآيات"}
+                        </button>
+                    </div>
+                </div>
+
+                ${
+                  !isTafsir && surah.number !== 1 && surah.number !== 9
+                    ? `
+                    <div class="bismillah" style="font-family: '${this.currentFont}', serif;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+                `
+                    : ""
+                }
+
+                <div class="verses-container ${
+                  isTafsir ? "tafsir-mode" : ""
+                }" style="font-family: '${
+      isTafsir ? "Cairo" : this.currentFont
+    }', ${isTafsir ? "sans-serif" : "serif"};">
+                    ${
+                      isTafsir
+                        ? this.currentTafsirData.ayahs
+                            .map(
+                              (ayah) => `
+                            <div class="tafsir-item">
+                                <span class="tafsir-number">الآية ${this.toArabicDigits(
+                                  ayah.numberInSurah
+                                )}</span>
+                                ${ayah.text}
+                            </div>
+                        `
+                            )
+                            .join("") +
+                          `
+                            <div class="tafsir-footer">
+                                <i class="fa-solid fa-circle-info"></i>
+                                المصدر: التفسير الميسر - مجمع الملك فهد لطباعة المصحف الشريف (عبر Al-Quran Cloud API)
+                            </div>
+                        `
+                        : surah.ayahs
+                            .map(
+                              (ayah) => `
+                            <span class="verse">
+                                ${ayah.text.replace(
+                                  "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّhِيمِ",
+                                  ""
+                                )}
+                                <span class="verse-number">${this.toArabicDigits(
+                                  ayah.numberInSurah
+                                )}</span>
+                            </span>
+                        `
+                            )
+                            .join(" ")
+                    }
+                </div>
+            </div>
+        `;
+
+    this.modalContent.scrollTop = 0;
+  }
+
+  toArabicDigits(num) {
+    const id = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+    return num.toString().replace(/[0-9]/g, (w) => id[+w]);
+  }
+
+  show() {
+    this.init().then(() => {
+      this.overlay.style.display = "flex";
+      setTimeout(() => this.overlay.classList.add("active"), 10);
+    });
+  }
+
+  hide() {
+    this.overlay.classList.remove("active");
+    setTimeout(() => {
+      this.overlay.style.display = "none";
+    }, 300);
+  }
+}
+
+// Global instance for onclick handlers in HTML strings
+window.quranReader = new QuranReader();
