@@ -19,7 +19,7 @@ export async function renderDashboard() {
 
     if (messages.length > 0) {
       lastMessage = messages.sort(
-        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
       )[0];
     }
 
@@ -138,7 +138,7 @@ export async function renderDashboard() {
         updateTime();
       },
 
-      1000
+      1000,
     );
 
     try {
@@ -183,7 +183,7 @@ export async function renderDashboard() {
           const city = "Cairo";
           const country = "Egypt";
           const response = await fetch(
-            `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=4`
+            `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=4`,
           );
           const data = await response.json();
           if (data.code === 200) {
@@ -280,7 +280,7 @@ export async function renderDashboard() {
             newInput.onchange = avatarInput.onchange;
 
             import("./core.js").then((m) =>
-              m.Notifications.success("تم تحديث الصورة الشخصية بنجاح")
+              m.Notifications.success("تم تحديث الصورة الشخصية بنجاح"),
             );
           };
           reader.readAsDataURL(file);
@@ -318,7 +318,7 @@ export async function renderDashboard() {
       ${(lastMessage.body || "").length > 100 ? "..." : ""}
 
       </p><div style="margin-top: 0.8rem; font-size: 0.8rem; opacity: 0.7;"><i class="fa-solid fa-feather"></i>${Utils.formatDate(
-        lastMessage.timestamp
+        lastMessage.timestamp,
       )}
 
       </div></div><button class="btn btn-glass" style="margin-top: 1rem; width: 100%;" onclick="location.hash='#messages'">فتح الرسائل</button>`
@@ -338,14 +338,14 @@ export async function renderDashboard() {
           }
 
       </h4><p style="font-size: 1.2rem; font-weight: 700; color: var(--text-secondary);">${new Date(
-        nextReminder.dateTime
+        nextReminder.dateTime,
       ).toLocaleTimeString("ar-EG", {
         hour: "2-digit",
         minute: "2-digit",
       })}
 
       </p><p style="font-size: 0.9rem; opacity: 0.8;">${new Date(
-        nextReminder.dateTime
+        nextReminder.dateTime,
       ).toLocaleDateString("ar-EG")}
 
       </p></div><button class="btn btn-glass" style="margin-top: 1rem; width: 100%;" onclick="location.hash='#reminders'">إدارة التذكيرات</button>`
@@ -467,7 +467,7 @@ export async function renderDashboard() {
     const renderActions = () => {
       const savedActions = JSON.parse(
         localStorage.getItem("quick_actions") ||
-          '["leads", "notes", "calculator", "calendar", "settings"]'
+          '["leads", "notes", "calculator", "calendar", "settings"]',
       );
 
       actionCard.innerHTML = ` <div class="card-hint-overlay"><div class="hint-text">اضغط<span style="color: #fff; padding: 0 5px;">R</span>للتبديل</div></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;"><div style="display: flex; align-items: center; gap: 10px;"><h3 style="margin:0;"><i class="fa-solid fa-bolt gold-text"></i>إجراءات سريعة</h3></div><button class="radio-mini-btn edit-actions-btn" title="تعديل الإجراءات" style="width:30px; height:30px; margin:0!important; background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2);"><i class="fa-solid fa-pen-to-square" style="font-size:0.8rem; color:var(--metallic-gold);"></i></button></div><div class="quick-actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; animation: fadeIn 0.3s ease;">${
@@ -475,10 +475,10 @@ export async function renderDashboard() {
           ? externalLinks
               .map(
                 (
-                  link
+                  link,
                 ) => ` <a href="${link.url}" target="_blank" class="btn btn-glass" style="text-decoration: none;"> <i class="fa-solid ${link.icon}"></i> ${link.label}
 
-          </a> `
+          </a> `,
               )
               .join("")
           : savedActions
@@ -514,11 +514,11 @@ export async function renderDashboard() {
 
         const currentActions = JSON.parse(
           localStorage.getItem("quick_actions") ||
-            '["leads", "notes", "calculator", "calendar", "settings"]'
+            '["leads", "notes", "calculator", "calendar", "settings"]',
         );
 
         modal.innerHTML = ` <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;"><h3>تخصيص الإجراءات السريعة</h3><button class="btn btn-glass close-modal" style="padding:5px 10px;"><i class="fa-solid fa-xmark"></i></button></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; flex:1; overflow-y:auto; padding-right:5px;">${Object.keys(
-          allPossibleActions
+          allPossibleActions,
         )
           .map(
             (key) => ` <div class="action-toggle-item ${
@@ -553,7 +553,7 @@ export async function renderDashboard() {
             }
 
       ">${allPossibleActions[key].label}</span>
-</div> `
+</div> `,
           )
           .join("")}
 
@@ -585,7 +585,7 @@ export async function renderDashboard() {
             } else {
               if (selected.length >= 8) {
                 import("./core.js").then((m) =>
-                  m.Notifications.warning("الحد الأقصى 8 إجراءات")
+                  m.Notifications.warning("الحد الأقصى 8 إجراءات"),
                 );
                 return;
               }
@@ -603,7 +603,7 @@ export async function renderDashboard() {
           renderActions();
           closeModal();
           import("./core.js").then((m) =>
-            m.Notifications.success("تم تحديث الإجراءات بنجاح")
+            m.Notifications.success("تم تحديث الإجراءات بنجاح"),
           );
         };
 
@@ -717,7 +717,7 @@ ${timeStr}
         else clearInterval(salesSyncInterval);
       },
 
-      3 * 60 * 1000
+      3 * 60 * 1000,
     ); // 3 minutes for dashboard sync
 
     grid.appendChild(actionCard);
@@ -744,12 +744,12 @@ ${timeStr}
         }
 
     </h3> </div> </div> <div class="radio-status-tag"> <span class="status-dot"></span> <span class="status-text">متصل</span> </div> </div> <div class="radio-visualizer"> <div class="waveform" id="radio-waveform" style="display:flex; align-items:flex-end; gap:8px; height:100%;"> ${Array(
-      24
+      24,
     )
       .fill(0)
       .map(
         () =>
-          ` <div class="wave-bar-container" style="position:relative; height:100%; width:10px; display:flex; align-items:flex-end;"> <div class="wave-bar"></div> <div class="peak-cap"></div> </div> `
+          ` <div class="wave-bar-container" style="position:relative; height:100%; width:10px; display:flex; align-items:flex-end;"> <div class="wave-bar"></div> <div class="peak-cap"></div> </div> `,
       )
       .join("")}
 
@@ -887,7 +887,7 @@ padding:12px; margin-bottom:8px; background:rgba(0, 0, 0, 0.2);
             : ""
         }
 
-        </div> `
+        </div> `,
             )
             .join("")}
 
@@ -983,7 +983,7 @@ padding:12px; margin-bottom:8px; background:rgba(0, 0, 0, 0.2);
                   bar.style.opacity = 0.4 + (currentBarHeights[i] / 100) * 0.6;
 
                   const hueShift = Math.floor(
-                    (currentBarHeights[i] / 100) * 15
+                    (currentBarHeights[i] / 100) * 15,
                   );
 
                   bar.style.filter = `hue-rotate(${hueShift}
@@ -1038,7 +1038,7 @@ padding:12px; margin-bottom:8px; background:rgba(0, 0, 0, 0.2);
         animateWave();
       },
 
-      50
+      50,
     );
 
     // Keyboard toggle for Quick Actions
@@ -1071,3 +1071,4 @@ padding:12px; margin-bottom:8px; background:rgba(0, 0, 0, 0.2);
     return errDiv;
   }
 }
+
