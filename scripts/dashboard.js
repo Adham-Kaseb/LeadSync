@@ -76,7 +76,7 @@ export async function renderDashboard() {
     </h1><div class="date-badge-container"><div class="date-badge gold-badge"><i class="fa-solid fa-moon"></i><span>${hijriDate}
 
     </span></div><div class="date-badge"><i class="fa-regular fa-calendar"></i><span>${gregorianDate}
-    </span></div><div class="date-badge gold-badge quran-badge" style="cursor: pointer; background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05)); border: 1px solid rgba(255, 215, 0, 0.3);" id="quran-btn"><i class="fa-solid fa-book-quran"></i><span>القرآن الكريم</span></div><div id="prayer-timer-badge" class="date-badge prayer-badge" style="display: none;"><i class="fa-solid fa-mosque"></i><span class="prayer-name">--</span><span class="prayer-time-badge" style="opacity: 0.6; margin: 0 5px;">--:--</span><span class="prayer-countdown" style="font-family: 'Orbitron', sans-serif; color: var(--metallic-gold); font-weight: 700;">00:00:00</span></div></div></div></div>
+    </span></div><div class="date-badge gold-badge quran-badge" style="cursor: pointer; background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05)); border: 1px solid rgba(255, 215, 0, 0.3);" id="quran-btn"><i class="fa-solid fa-book-quran"></i><span>القرآن الكريم</span></div><div id="prayer-timer-badge" class="date-badge prayer-badge" style="display: none; align-items: center; gap: 4px;"><i class="fa-solid fa-mosque"></i><span class="prayer-name" style="font-weight: bold; margin-left: 2px;">--</span><span style="opacity: 0.8;">هتأذن في</span><span class="prayer-time-badge" style="opacity: 1; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 6px;">--:--</span><span style="opacity: 0.8;">فاضل بالظبط</span><span class="prayer-countdown" style="font-family: 'Orbitron', sans-serif; color: var(--metallic-gold); font-weight: 700; font-size: 1.1em; letter-spacing: 1px;">00:00</span></div></div></div></div>
     
     <div class="header-clock-section"><div id="clock-display" class="digital-clock" style="direction: ltr;"><span class="clock-part" id="clock-h">12</span><span class="clock-colon">:</span><span class="clock-part" id="clock-m">00</span><div class="clock-ampm" id="clock-p" style="margin-left: 10px;">PM</div></div></div></div>`;
 
@@ -164,6 +164,38 @@ export async function renderDashboard() {
       const prayerBadge = header.querySelector("#prayer-timer-badge");
       if (!prayerBadge) return;
 
+      prayerBadge.style.position = "relative";
+
+      const prayerTooltip = document.createElement("div");
+      prayerTooltip.className = "prayer-alert-tooltip";
+      prayerTooltip.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-bell fa-shake" style="color:var(--metallic-gold);"></i>
+            <span>متبقي 15 دقيقة على إقامة الصلاة</span>
+        </div>
+        <div class="tooltip-arrow" style="position:absolute; bottom:-6px; right:20px; width:12px; height:12px; background:rgba(0,0,0,0.85); border-right:1px solid rgba(255,215,0,0.3); border-bottom:1px solid rgba(255,215,0,0.3); transform:rotate(45deg);"></div>
+      `;
+      prayerTooltip.style.cssText = `
+        position: absolute;
+        bottom: calc(100% + 15px);
+        right: 0;
+        background: rgba(0,0,0,0.85);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        padding: 10px 15px;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform: translateY(10px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.1);
+        z-index: 100;
+        backdrop-filter: blur(10px);
+      `;
+      prayerBadge.appendChild(prayerTooltip);
+
       const prayerNameEl = prayerBadge.querySelector(".prayer-name");
       const prayerTimeEl = prayerBadge.querySelector(".prayer-time-badge");
       const countdownEl = prayerBadge.querySelector(".prayer-countdown");
@@ -231,13 +263,20 @@ export async function renderDashboard() {
         const diff = nextPrayerTime - now;
         const h = Math.floor(diff / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
 
         prayerNameEl.innerText = PRAYER_NAMES_AR[nextPrayer];
         prayerTimeEl.innerText = timings[nextPrayer];
         countdownEl.innerText = `${h.toString().padStart(2, "0")}:${m
           .toString()
-          .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+          .padStart(2, "0")}`;
+
+        if (diff <= 15 * 60 * 1000 && diff > 12 * 60 * 1000) {
+          prayerTooltip.style.opacity = "1";
+          prayerTooltip.style.transform = "translateY(0)";
+        } else {
+          prayerTooltip.style.opacity = "0";
+          prayerTooltip.style.transform = "translateY(10px)";
+        }
       };
 
       const prayerInterval = setInterval(() => {
