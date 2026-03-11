@@ -1,8 +1,8 @@
 .shortcut-badge {
     position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%) translateX(-10px);
+    right: 50%; /* Center horizontally */
+    top: -20px; /* Position it above the item */
+    transform: translateX(50%) translateY(10px); /* Start slightly lower and center aligned for animation */
     display: flex;
     align-items: center;
     gap: 4px;
@@ -10,7 +10,7 @@
     z-index: 50;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
     direction: ltr;
     background: rgba(15, 15, 15, 0.85);
     backdrop-filter: blur(12px) saturate(180%);
@@ -21,11 +21,11 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
-.nav-item:hover .shortcut-badge {
+.sidebar:not(.collapsed) .nav-item:hover .shortcut-badge {
     opacity: 1;
     visibility: visible;
-    transform: translateY(-50%) translateX(0);
-    transition-delay: 1.5s;
+    transform: translateX(50%) translateY(0); /* Float up smoothly to hover right above the nav-item */
+    transition-delay: 2s; /* Changed to 2 seconds as requested */
 }
 
 .key-cap {

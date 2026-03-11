@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LeadSync</title>
     <script>
+      document.documentElement.classList.add("app-loading");
       if (sessionStorage.getItem("auth") !== "true") {
         document.documentElement.classList.add("app-locked");
       }
@@ -16,6 +17,13 @@
       html.app-locked body {
         background-color: #0d0d0d !important;
         overflow: hidden !important;
+      }
+      html.app-loading .nav-links {
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      .nav-links {
+        transition: opacity 0.3s ease;
       }
     </style>
     <link rel="stylesheet" href="styles/main.css" />
@@ -57,62 +65,64 @@
         <ul class="nav-links">
           <li>
             <a href="#dashboard" class="nav-item active" data-target="dashboard"
-              ><i class="fa-solid fa-house"></i> الـ HQ</a
+              ><i class="fa-solid fa-house"></i> <span>الـ HQ</span></a
             >
           </li>
           <li>
             <a href="#leads" class="nav-item" data-target="leads"
-              ><i class="fa-solid fa-users"></i> العملاء</a
+              ><i class="fa-solid fa-users"></i> <span>العملاء</span></a
             >
           </li>
           <li>
             <a href="#almdrasa" class="nav-item" data-target="almdrasa"
-              ><i class="fa-solid fa-school"></i> المدرسة</a
+              ><i class="fa-solid fa-school"></i> <span>المدرسة</span></a
             >
           </li>
           <li>
             <a href="#messages" class="nav-item" data-target="messages"
-              ><i class="fa-solid fa-comment-dots"></i> الرسائل</a
+              ><i class="fa-solid fa-comment-dots"></i> <span>الرسائل</span></a
             >
           </li>
           <li>
             <a href="#notes" class="nav-item" data-target="notes"
-              ><i class="fa-solid fa-note-sticky"></i> الملاحظات</a
+              ><i class="fa-solid fa-note-sticky"></i> <span>الملاحظات</span></a
             >
           </li>
           <li>
             <a href="#links" class="nav-item" data-target="links"
-              ><i class="fa-solid fa-link"></i> الروابط</a
+              ><i class="fa-solid fa-link"></i> <span>الروابط</span></a
             >
           </li>
           <li>
             <a href="#calculator" class="nav-item" data-target="calculator"
-              ><i class="fa-solid fa-calculator"></i> الخصومات</a
+              ><i class="fa-solid fa-calculator"></i> <span>الخصومات</span></a
             >
           </li>
           <li>
             <a href="#reminders" class="nav-item" data-target="reminders"
-              ><i class="fa-solid fa-bell"></i> التذكيرات</a
+              ><i class="fa-solid fa-bell"></i> <span>التذكيرات</span></a
             >
           </li>
           <li>
             <a href="#calendar" class="nav-item" data-target="calendar"
-              ><i class="fa-solid fa-calendar-days"></i> التقويم</a
+              ><i class="fa-solid fa-calendar-days"></i> <span>التقويم</span></a
             >
           </li>
           <li>
             <a href="#articles" class="nav-item" data-target="articles"
-              ><i class="fa-solid fa-newspaper"></i> المقالات</a
+              ><i class="fa-solid fa-newspaper"></i> <span>المقالات</span></a
             >
           </li>
           <li>
             <a href="#sales" class="nav-item" data-target="sales"
-              ><i class="fa-solid fa-chart-line"></i> تقرير المبيعات</a
+              ><i class="fa-solid fa-chart-line"></i>
+              <span>تقرير المبيعات</span></a
             >
           </li>
           <li>
             <a href="#meetings" class="nav-item" data-target="meetings"
-              ><i class="fa-solid fa-handshake"></i> مواعيد الاجتماعات</a
+              ><i class="fa-solid fa-handshake"></i>
+              <span>مواعيد الاجتماعات</span></a
             >
           </li>
 
@@ -128,22 +138,25 @@
             <ul class="nav-submenu" id="settings-submenu">
               <li>
                 <a href="#tvmode" class="nav-item" data-target="tvmode"
-                  ><i class="fa-solid fa-tv"></i> التلفاز</a
+                  ><i class="fa-solid fa-tv"></i> <span>التلفاز</span></a
                 >
               </li>
               <li>
                 <a href="#whatsapp" class="nav-item" data-target="whatsapp"
-                  ><i class="fa-solid fa-square-phone"></i> واتساب</a
+                  ><i class="fa-solid fa-square-phone"></i>
+                  <span>واتساب</span></a
                 >
               </li>
               <li>
                 <a href="#passwords" class="nav-item" data-target="passwords"
-                  ><i class="fa-solid fa-vault"></i> إدارة كلمات المرور</a
+                  ><i class="fa-solid fa-vault"></i>
+                  <span>إدارة كلمات المرور</span></a
                 >
               </li>
               <li>
                 <a href="#settings" class="nav-item" data-target="settings"
-                  ><i class="fa-solid fa-gear"></i> الإعدادات الرئيسية</a
+                  ><i class="fa-solid fa-gear"></i>
+                  <span>الإعدادات الرئيسية</span></a
                 >
               </li>
             </ul>
@@ -155,6 +168,43 @@
           id="app-info-trigger"
           style="margin-top: auto; padding-top: 20px"
         >
+          <div
+            style="
+              text-align: center;
+              margin-bottom: 12px;
+              font-size: 0.75rem;
+              color: rgba(255, 255, 255, 0.4);
+              direction: ltr;
+            "
+            class="sidebar-collapse-hint"
+          >
+            <kbd
+              style="
+                background: rgba(255, 255, 255, 0.1);
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-family: monospace;
+              "
+              >Alt</kbd
+            >
+            +
+            <kbd
+              style="
+                background: rgba(255, 255, 255, 0.1);
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-family: monospace;
+              "
+              >Shift</kbd
+            >
+            <span
+              style="
+                font-family: &quot;Cairo&quot;, sans-serif;
+                margin-left: 4px;
+              "
+              >للتبديل</span
+            >
+          </div>
           <div
             style="
               background: rgba(255, 255, 255, 0.03);
@@ -255,4 +305,3 @@
     <script type="module" src="scripts/app.js"></script>
   </body>
 </html>
-

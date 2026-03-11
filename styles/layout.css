@@ -19,7 +19,63 @@
     top: 1rem;
     height: calc(100vh - 2rem);
     overflow-y: auto; 
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.sidebar.collapsed {
+    width: 80px;
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+}
+
+.sidebar.collapsed .nav-item > span:not(.shortcut-badge),
+.sidebar.collapsed .sidebar-collapse-hint {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.sidebar:not(.collapsed) .nav-item > span:not(.shortcut-badge),
+.sidebar:not(.collapsed) .sidebar-collapse-hint {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    transition: opacity 0.3s ease 0.1s, visibility 0.3s ease 0.1s;
+}
+
+.sidebar.collapsed .nav-item i {
+    margin-left: 0;
+    font-size: 1.4rem;
+    transition: font-size 0.3s ease, margin 0.3s ease;
+}
+
+.sidebar:not(.collapsed) .nav-item i {
+    transition: font-size 0.3s ease, margin 0.3s ease;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 12px;
+}
+
+.sidebar.collapsed .nav-item.active::before {
+    right: -8px;
+}
+
+.sidebar.collapsed .sidebar-footer > div > div:nth-last-child(1) {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .dropdown-trigger .arrow {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
 
 .logo {
     font-size: 1.8rem;

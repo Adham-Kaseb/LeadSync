@@ -2,19 +2,23 @@ import { Storage, Utils } from './core.js';
 import { ShortcutsManager } from './shortcuts.js';
 import { showHealthPopup, getHealthContent, saveHealthContent } from './health.js';
 
-const createToggleHTML = (id, label, showReorder = false) => `
-    <div class="sidebar-manage-row" data-id="${id}" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
-        <div style="display: flex; align-items: center; gap: 12px;">
+const createToggleHTML = (id, label, showReorder = false, locked = false) => `
+    <div class="sidebar-manage-row ${locked ? 'locked-feature' : ''}" data-id="${id}" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); ${locked ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
             ${showReorder ? `
-                <div class="reorder-btns" style="display: flex; flex-direction: column; gap: 2px;">
-                    <button class="reorder-btn up" title="تحريك لأعلى" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; padding:2px; font-size:0.7rem;"><i class="fa-solid fa-chevron-up"></i></button>
-                    <button class="reorder-btn down" title="تحريك لأسفل" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:pointer; padding:2px; font-size:0.7rem;"><i class="fa-solid fa-chevron-down"></i></button>
+                <div class="reorder-btns" style="display: flex; flex-direction: column; gap: 2px; ${locked ? 'pointer-events: none;' : ''}">
+                    <button class="reorder-btn up" title="تحريك لأعلى" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:${locked ? 'not-allowed' : 'pointer'}; padding:2px; font-size:0.7rem;"><i class="fa-solid fa-chevron-up"></i></button>
+                    <button class="reorder-btn down" title="تحريك لأسفل" style="background:none; border:none; color:rgba(255,255,255,0.3); cursor:${locked ? 'not-allowed' : 'pointer'}; padding:2px; font-size:0.7rem;"><i class="fa-solid fa-chevron-down"></i></button>
                 </div>
             ` : ''}
-            <span style="font-weight: 500; color: #fff;">${label}</span>
+            <span style="font-weight: 500; color: #fff; display: flex; align-items: center; gap: 8px;">
+                ${locked ? '<i class="fa-solid fa-lock" style="color: var(--text-secondary); font-size: 0.8rem;"></i>' : ''}
+                ${label}
+                ${locked ? '<span style="font-size: 0.65rem; background: rgba(255,0,0,0.15); color: #ff4d4d; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,0,0,0.2);">تحت التطوير</span>' : ''}
+            </span>
         </div>
-        <label class="switch">
-            <input type="checkbox" id="toggle-${id}">
+        <label class="switch" style="${locked ? 'pointer-events: none; opacity: 0.5;' : ''}">
+            <input type="checkbox" id="toggle-${id}" ${locked ? 'disabled' : ''}>
             <span class="slider"></span>
         </label>
     </div>
@@ -85,7 +89,11 @@ export function renderSettings() {
                     'sales': 'المبيعات', 'tvmode': 'التلفاز', 'whatsapp': 'واتساب', 
                     'meetings': 'الاجتماعات', 'passwords': 'كلمات المرور'
                 };
-                return createToggleHTML(id, labels[id] || id, true);
+                
+                // Lock the 'articles' module
+                const isLocked = id === 'articles';
+                
+                return createToggleHTML(id, labels[id] || id, true, isLocked);
             }).join('')}
         </div>
 

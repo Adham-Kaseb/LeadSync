@@ -446,6 +446,7 @@ window.applySidebarOrder = () => {
 window.addEventListener("DOMContentLoaded", async () => {
   if (sessionStorage.getItem("auth") !== "true") {
     createLockScreen();
+    document.documentElement.classList.remove("app-loading");
     return;
   }
 
@@ -453,6 +454,20 @@ window.addEventListener("DOMContentLoaded", async () => {
   initMobileUI();
   ShortcutsManager.init();
   applySidebarOrder();
+
+  // Show navigation links securely after order and visibility logic applies
+  document.documentElement.classList.remove("app-loading");
+
+  // Sidebar Collapse on Alt + Shift
+  document.addEventListener("keydown", (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) || document.activeElement.isContentEditable) return;
+    if (e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey && (e.key === "Shift" || e.key === "Alt")) {
+      const sidebar = document.querySelector(".sidebar");
+      if (sidebar) {
+        sidebar.classList.toggle("collapsed");
+      }
+    }
+  });
 
   try {
     const { checkReminders } = await import("./reminders.js");
