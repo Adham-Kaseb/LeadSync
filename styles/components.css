@@ -25,6 +25,11 @@
     border-color: var(--color-border-hover);
 }
 
+.glass-card.premium-radio:hover {
+    transform: none;
+    border-color: var(--color-border-hover);
+}
+
 .glass-card.dragging {
     opacity: 0.5;
     transform: scale(0.95);

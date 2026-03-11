@@ -567,19 +567,22 @@ function createLockScreen() {
       sessionStorage.setItem("currentUser", greeting);
 
       container.innerHTML = `
-        <div class="busy-loader-wrapper">
-          <div class="busy-character">
-            <div class="agent-emoji">👨‍💻</div>
-            <i class="fa-solid fa-phone-volume busy-icon p1"></i>
-            <i class="fa-solid fa-envelope-open-text busy-icon p2"></i>
-            <i class="fa-solid fa-mug-hot busy-icon p3"></i>
-            <i class="fa-solid fa-chart-line busy-icon p4"></i>
-            <i class="fa-solid fa-file-signature busy-icon p5"></i>
-            <i class="fa-solid fa-paper-plane busy-icon p6"></i>
+        <div class="premium-loader-wrapper">
+          <div class="cyber-circle-container">
+            <div class="cyber-ring ring-1"></div>
+            <div class="cyber-ring ring-2"></div>
+            <div class="cyber-ring ring-3"></div>
+            <div class="center-glow">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
           </div>
-          <h3 class="loader-message">لحظات بنجهزلك كل حاجة...</h3>
-          <div class="loader-progress">
-             <div class="loader-bar"></div>
+          <div class="loader-text-container">
+            <h3 class="cyber-loader-message">لحظات</h3>
+            <p class="cyber-loader-sub">SYSTEM INITIATED</p>
+          </div>
+          <div class="cyber-progress-container">
+             <div class="cyber-progress-bar"></div>
+             <div class="cyber-progress-glow"></div>
           </div>
         </div>
       `;
@@ -593,12 +596,12 @@ function createLockScreen() {
       setTimeout(() => {
         lockScreen.style.opacity = "0";
         lockScreen.style.transition =
-          "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+          "opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
         setTimeout(() => {
           lockScreen.remove();
           window.location.reload();
-        }, 600);
-      }, 3000);
+        }, 400);
+      }, 2000);
     } else {
       container.classList.add("shake");
       input.style.borderColor = "#ff4d4d";
@@ -644,4 +647,3 @@ function createLockScreen() {
 
   setTimeout(() => input.focus(), 100);
 }
-

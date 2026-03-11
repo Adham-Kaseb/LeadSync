@@ -264,8 +264,16 @@ export async function renderDashboard() {
         const h = Math.floor(diff / 3600000);
         const m = Math.floor((diff % 3600000) / 60000);
 
+        // Convert strict 24h format to 12h format strings
+        let [pHours, pMins] = timings[nextPrayer].split(":");
+        pHours = parseInt(pHours, 10);
+        const ampm = pHours >= 12 ? "م" : "ص";
+        pHours = pHours % 12;
+        pHours = pHours ? pHours : 12; // 0 becomes 12
+        const formattedPrayerTime = `${pHours.toString().padStart(2, "0")}:${pMins} ${ampm}`;
+
         prayerNameEl.innerText = PRAYER_NAMES_AR[nextPrayer];
-        prayerTimeEl.innerText = timings[nextPrayer];
+        prayerTimeEl.innerText = formattedPrayerTime;
         countdownEl.innerText = `${h.toString().padStart(2, "0")}:${m
           .toString()
           .padStart(2, "0")}`;
@@ -768,6 +776,37 @@ ${timeStr}
     radioPlaceholder.style.width = "100%";
     radioPlaceholder.style.marginTop = "1.5rem";
 
+    const radioToggleBtn = document.createElement("button");
+    radioToggleBtn.className = "btn btn-glass radio-toggle-btn";
+    radioToggleBtn.style.cssText = `
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(255, 215, 0, 0.05);
+        border: 1px dashed rgba(255, 215, 0, 0.3);
+        transition: all 0.4s ease;
+    `;
+    radioToggleBtn.innerHTML =
+      '<i class="fa-solid fa-radio gold-text"></i> تشغيل الراديو';
+
+    const radioContainerWrapper = document.createElement("div");
+    radioContainerWrapper.className = "radio-collapsible-wrapper";
+    radioContainerWrapper.style.cssText = `
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateY(20px) scale(0.98);
+        transform-origin: top;
+    `;
+
+    radioPlaceholder.appendChild(radioToggleBtn);
+    radioPlaceholder.appendChild(radioContainerWrapper);
+
     container.appendChild(radioPlaceholder);
 
     setTimeout(
@@ -795,9 +834,47 @@ ${timeStr}
     </div> </div> <div class="radio-controls-row"> <div class="volume-control"> <button class="radio-mini-btn mute-btn" title="كتم الصوت"><i class="fa-solid fa-volume-high"></i></button> <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${
       radio.volume
     }" style="--volume-percent: ${radio.volume * 100}%">
-</div> <div class="main-btns"> <button class="radio-btn prev-btn" title="القارئ السابق"><i class="fa-solid fa-backward-step"></i></button> <button class="radio-btn play-btn" id="radio-play-toggle"> <i class="fa-solid fa-play"></i> </button> <button class="radio-btn next-btn" title="القارئ التالي"><i class="fa-solid fa-forward-step"></i></button> </div> <div class="radio-actions"> <button class="radio-mini-btn mirror-btn" id="switch-mirror" title="تبديل السيرفر" style="display: none;"><i class="fa-solid fa-server"></i></button> <button class="radio-mini-btn refresh-btn" id="refresh-stream" title="تحديث البث"><i class="fa-solid fa-arrows-rotate"></i></button> <button class="radio-mini-btn" id="copy-stream" title="نسخ رابط البث"><i class="fa-solid fa-link"></i></button> <button class="radio-mini-btn" id="search-reciter" title="بحث عن قارئ"><i class="fa-solid fa-magnifying-glass"></i></button> </div> </div> `;
+</div> <div class="main-btns"> <button class="radio-btn prev-btn" title="القارئ السابق"><i class="fa-solid fa-backward-step"></i></button> <button class="radio-btn play-btn" id="radio-play-toggle"> <i class="fa-solid fa-play"></i> </button> <button class="radio-btn next-btn" title="القارئ التالي"><i class="fa-solid fa-forward-step"></i></button> </div> <div class="radio-actions" style="display: flex; gap: 8px;"> <button class="radio-mini-btn mirror-btn" id="switch-mirror" title="تبديل السيرفر" style="display: none;"><i class="fa-solid fa-server"></i></button> <button class="radio-mini-btn refresh-btn" id="refresh-stream" title="تحديث البث"><i class="fa-solid fa-arrows-rotate"></i></button> <button class="radio-mini-btn" id="copy-stream" title="نسخ رابط البث"><i class="fa-solid fa-link"></i></button> <button class="radio-mini-btn" id="search-reciter" title="بحث عن قارئ"><i class="fa-solid fa-magnifying-glass"></i></button> <button class="radio-mini-btn" id="close-radio" title="إغلاق الراديو"><i class="fa-solid fa-xmark"></i></button> </div> </div> `;
 
-        radioPlaceholder.appendChild(radioContainer);
+        radioContainerWrapper.appendChild(radioContainer);
+
+        const isRadioOpen = sessionStorage.getItem("radio_open") === "true";
+
+        if (isRadioOpen) {
+          radioToggleBtn.style.display = "none";
+          radioContainerWrapper.style.maxHeight = "500px";
+          radioContainerWrapper.style.opacity = "1";
+          radioContainerWrapper.style.transform = "translateY(0) scale(1)";
+        }
+
+        radioToggleBtn.onclick = () => {
+          radioToggleBtn.style.opacity = "0";
+          radioToggleBtn.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            sessionStorage.setItem("radio_open", "true");
+            radioToggleBtn.style.display = "none";
+            radioContainerWrapper.style.maxHeight = "500px";
+            radioContainerWrapper.style.opacity = "1";
+            radioContainerWrapper.style.transform = "translateY(0) scale(1)";
+          }, 300);
+        };
+
+        const closeBtn = radioContainer.querySelector("#close-radio");
+        closeBtn.onclick = () => {
+          sessionStorage.setItem("radio_open", "false");
+          radioContainerWrapper.style.maxHeight = "0";
+          radioContainerWrapper.style.opacity = "0";
+          radioContainerWrapper.style.transform =
+            "translateY(20px) scale(0.98)";
+
+          setTimeout(() => {
+            radioToggleBtn.style.display = "flex";
+            setTimeout(() => {
+              radioToggleBtn.style.opacity = "1";
+              radioToggleBtn.style.transform = "scale(1)";
+            }, 50);
+          }, 500);
+        };
 
         const playBtn = radioContainer.querySelector("#radio-play-toggle");
         const nextBtn = radioContainer.querySelector(".next-btn");
