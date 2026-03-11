@@ -236,7 +236,7 @@ export function openAboutModal() {
 
                 <h1 style="font-size: 3.5rem; margin: 1rem 0 0.8rem; background: linear-gradient(to right, #ffffff, #ffd700, #ffffff); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; animation: premiumShine 8s linear infinite; letter-spacing: -2px;">LeadSync</h1>
                 <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top: 0.5rem;">
-                    <span class="version-tag">v1.27.0</span>
+                    <span class="version-tag">v1.29.3</span>
                     <span class="elite-badge">Elite Edition</span>
                 </div>
             </div>
